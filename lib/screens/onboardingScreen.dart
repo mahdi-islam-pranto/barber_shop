@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../components/onboardingContent.dart';
 import '../components/onboardingDots.dart';
+import '../resources/colors.dart';
+import 'homepage.dart';
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});
@@ -58,9 +60,17 @@ class _OnboardingPageState extends State<OnboardingPage> {
             // TODO: Button
 
             ElevatedButton(
-              onPressed: () {},
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all(buttonColor),
+              ),
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) {
+                  return const HomePage();
+                }));
+              },
               child: Text(
                 "Get Started".toUpperCase(),
+                style: TextStyle(color: backGroundColor),
               ),
             ),
             const Spacer(),
