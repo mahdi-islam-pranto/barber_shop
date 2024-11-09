@@ -1,5 +1,5 @@
+import 'package:barber_shop/components/shopNearYou.dart';
 import 'package:flutter/material.dart';
-
 import '../components/servicesSection.dart';
 import '../resources/colors.dart';
 
@@ -64,9 +64,19 @@ class _HomePageState extends State<HomePage> {
 
             const SizedBox(height: 20),
             // all services
-            ServicesSection(),
+            const ServicesSection(),
 
-            // All Specialists
+            const SizedBox(height: 20),
+
+            // best Shops near you section
+
+            const Align(
+                alignment: Alignment.centerLeft,
+                child: Text("BEST SHOPS NEAR YOU",
+                    style:
+                        TextStyle(fontSize: 21, fontWeight: FontWeight.bold))),
+
+            const ShopNearYou(),
           ],
         ),
       ),
