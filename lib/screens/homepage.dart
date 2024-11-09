@@ -66,7 +66,7 @@ class _HomePageState extends State<HomePage> {
             // all services
             const ServicesSection(),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 40),
 
             // best Shops near you section
 
@@ -77,6 +77,16 @@ class _HomePageState extends State<HomePage> {
                         TextStyle(fontSize: 21, fontWeight: FontWeight.bold))),
 
             const ShopNearYou(),
+
+            SizedBox(height: 40),
+
+            // book Appointment section
+
+            const Align(
+                alignment: Alignment.centerLeft,
+                child: Text("BOOK AN APPOINTMENT",
+                    style:
+                        TextStyle(fontSize: 21, fontWeight: FontWeight.bold))),
           ],
         ),
       ),
