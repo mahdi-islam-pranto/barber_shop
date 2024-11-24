@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:contained_tab_bar_view/contained_tab_bar_view.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
 
 import '../resources/colors.dart';
 
@@ -45,7 +46,7 @@ class _LoginPageState extends State<LoginPage> {
             Container(
               padding: const EdgeInsets.only(left: 20, right: 20, top: 20),
               width: double.infinity,
-              height: MediaQuery.of(context).size.height / 2.5,
+              height: MediaQuery.of(context).size.height,
               child: ContainedTabBarView(
                 tabBarProperties: TabBarProperties(
                     width: 200,
@@ -177,20 +178,235 @@ class _LoginPageState extends State<LoginPage> {
                             "Login".toUpperCase(),
                             style: TextStyle(
                                 color: backGroundColor,
-                                fontSize: 20,
+                                fontSize: 16,
                                 fontWeight: FontWeight.bold),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  Container(color: boxColor)
+
+                  // Sign up form
+                  _buildSignUpForm()
                 ],
                 onChange: (index) => print(index),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+// sign up tab
+  Widget _buildSignUpForm() {
+    final textFieldFocusNode = FocusNode();
+    bool obscured = true;
+
+    void toggleObscured() {
+      setState(() {
+        obscured = !obscured;
+        if (textFieldFocusNode.hasPrimaryFocus)
+          return; // If focus is on text field, dont unfocus
+        textFieldFocusNode.canRequestFocus =
+            false; // Prevents focus if tap on eye
+      });
+    }
+
+    return Container(
+      padding: const EdgeInsets.only(top: 20),
+      child: Column(
+        children: [
+          // Name form
+          TextFormField(
+              style: TextStyle(color: textColor),
+              keyboardType: TextInputType.name,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Name is required.';
+                }
+                return null;
+              },
+              decoration: InputDecoration(
+                fillColor: boxColor,
+                contentPadding: const EdgeInsets.all(20),
+                filled: true,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(color: textColor, width: 2.0),
+                ),
+                prefixIcon: Icon(Icons.person, color: textColor),
+                hintStyle: TextStyle(color: textColor.withOpacity(0.5)),
+                hintText: "Full name",
+                labelStyle: TextStyle(color: textColor),
+              )),
+
+          const SizedBox(
+            height: 12,
+          ),
+
+          // phone number form
+          TextFormField(
+              style: TextStyle(color: textColor),
+              keyboardType: TextInputType.phone,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Phone number is required.';
+                }
+                return null;
+              },
+              decoration: InputDecoration(
+                fillColor: boxColor,
+                contentPadding: const EdgeInsets.all(20),
+                filled: true,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(color: textColor, width: 2.0),
+                ),
+                prefixIcon: Icon(Icons.phone, color: textColor),
+                hintStyle: TextStyle(color: textColor.withOpacity(0.5)),
+                hintText: "Phone number",
+                labelStyle: TextStyle(color: textColor),
+              )),
+
+          const SizedBox(
+            height: 12,
+          ),
+
+          // address form
+
+          TextFormField(
+              style: TextStyle(color: textColor),
+              keyboardType: TextInputType.streetAddress,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'provide an address';
+                }
+                return null;
+              },
+              decoration: InputDecoration(
+                fillColor: boxColor,
+                contentPadding: const EdgeInsets.all(20),
+                filled: true,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(color: textColor, width: 2.0),
+                ),
+                prefixIcon: Icon(Icons.home_filled, color: textColor),
+                hintStyle: TextStyle(color: textColor.withOpacity(0.5)),
+                hintText: "Address",
+                labelStyle: TextStyle(color: textColor),
+              )),
+
+          const SizedBox(
+            height: 12,
+          ),
+          // email form
+          TextFormField(
+              style: TextStyle(color: textColor),
+              keyboardType: TextInputType.emailAddress,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Email or Phone number is required.';
+                }
+                return null;
+              },
+              decoration: InputDecoration(
+                fillColor: boxColor,
+                contentPadding: const EdgeInsets.all(20),
+                filled: true,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(color: textColor, width: 2.0),
+                ),
+                prefixIcon: Icon(Icons.person, color: textColor),
+                hintStyle: TextStyle(color: textColor.withOpacity(0.5)),
+                hintText: "Email address",
+                labelStyle: TextStyle(color: textColor),
+              )),
+          const SizedBox(
+            height: 12,
+          ),
+
+          // password field
+          TextFormField(
+            obscureText: obscured,
+            style: TextStyle(color: textColor),
+            keyboardType: TextInputType.visiblePassword,
+            decoration: InputDecoration(
+              fillColor: boxColor,
+              contentPadding: const EdgeInsets.all(20),
+              filled: true,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: textColor, width: 2.0),
+              ),
+              prefixIcon: Icon(Icons.lock, color: textColor),
+              suffixIcon: Padding(
+                padding: const EdgeInsets.fromLTRB(0, 0, 4, 0),
+                child: GestureDetector(
+                  onTap: toggleObscured,
+                  child: Icon(
+                    obscured
+                        ? Icons.visibility_off_rounded
+                        : Icons.visibility_rounded,
+                    size: 24,
+                    color: Colors.grey[700],
+                  ),
+                ),
+              ),
+              hintStyle: TextStyle(color: textColor.withOpacity(0.5)),
+              hintText: "Password",
+              labelStyle: TextStyle(color: textColor),
+            ),
+          ),
+
+          const SizedBox(
+            height: 20,
+          ),
+
+          // login button
+
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: buttonColor,
+              minimumSize: const Size(200, 50),
+              maximumSize: const Size(200, 50),
+            ),
+            onPressed: () {},
+            child: Text(
+              "Get Started".toUpperCase(),
+              style: TextStyle(
+                  color: backGroundColor,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold),
+            ),
+          ),
+
+          const SizedBox(
+            height: 20,
+          )
+        ],
       ),
     );
   }
