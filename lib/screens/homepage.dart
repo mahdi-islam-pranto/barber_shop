@@ -78,7 +78,7 @@ class _HomePageState extends State<HomePage> {
 
             const ShopNearYou(),
 
-            SizedBox(height: 40),
+            const SizedBox(height: 40),
 
             // book Appointment section
 

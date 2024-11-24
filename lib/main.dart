@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'Auth/loginPage.dart';
 import 'screens/onboardingScreen.dart';
 
 void main() {
@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: const Scaffold(
-        body: OnboardingPage(),
+        body: LoginPage(),
       ),
     );
   }
