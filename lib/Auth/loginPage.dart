@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:contained_tab_bar_view/contained_tab_bar_view.dart';
 import '../resources/colors.dart';
 import '../screens/homepage.dart';
+import 'forgot_password.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -87,6 +88,14 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  int _currentIndex = 0;
+
+  void _navigateToSignup() {
+    setState(() {
+      _currentIndex = 1;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -110,6 +119,7 @@ class _LoginPageState extends State<LoginPage> {
               width: double.infinity,
               height: MediaQuery.of(context).size.height,
               child: ContainedTabBarView(
+                initialIndex: _currentIndex,
                 tabBarProperties: TabBarProperties(
                     width: 200,
                     indicatorColor: textColor,
@@ -227,7 +237,18 @@ class _LoginPageState extends State<LoginPage> {
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: <Widget>[
                               TextButton(
-                                onPressed: () {},
+                                style: TextButton.styleFrom(
+                                  minimumSize: Size.zero,
+                                  padding: EdgeInsets.zero,
+                                ),
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const ForgotPassword()),
+                                  );
+                                },
                                 child: const Text(
                                   "Forgot Password?",
                                   style: TextStyle(
@@ -236,6 +257,15 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                               ),
                             ],
+                          ),
+
+                          // dont have an account
+                          const Text(
+                            "Don't have an account? Go to Sign up",
+                            style: TextStyle(color: Colors.grey, fontSize: 10),
+                          ),
+                          const SizedBox(
+                            height: 10,
                           ),
 
                           // login button

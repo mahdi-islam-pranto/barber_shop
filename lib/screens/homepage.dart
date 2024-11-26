@@ -30,6 +30,7 @@ class _HomePageState extends State<HomePage> {
                 GestureDetector(
                   onTap: () {
                     FirebaseAuth.instance.signOut();
+
                     debugPrint('########## User Logged Out');
                     Navigator.push(context,
                         MaterialPageRoute(builder: (context) {
