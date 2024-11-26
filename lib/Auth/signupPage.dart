@@ -1,3 +1,4 @@
+import 'package:barber_shop/database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -40,17 +41,36 @@ class _SignupPageState extends State<SignupPage> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
+  bool _isLoading = false;
+
   // signup function with firebase
   void signup() async {
     if (_formKey.currentState!.validate()) {
       try {
         UserCredential userCredential = await FirebaseAuth.instance
             .createUserWithEmailAndPassword(email: email, password: password);
-        print("User Signed Up:  + ${userCredential.user!.uid}");
-        print("Email:  + ${userCredential.user!.email}");
+        print("User Signed Up:   ${userCredential.user!.uid}");
+        print("Email:   ${userCredential.user!.email}");
 
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("Registered Successfully")));
+
+        // add user details to firestore collection
+        String id = userCredential.user!.uid;
+        Map<String, dynamic> userDetailsMap = {
+          "id": id,
+          "name": nameController.text.trim(),
+          "phone": phoneController.text.trim(),
+          "email": emailController.text.trim(),
+        };
+        // add this user to firestore
+        await DatabaseService()
+            .addUserDetails(userDetailsMap, id)
+            .then((value) {
+          print("User Added to database successfully");
+        }).catchError((error) {
+          print("Failed to add user: $error");
+        });
 
         // navigate to Home page
         Navigator.push(context, MaterialPageRoute(builder: (context) {
@@ -244,38 +264,47 @@ class _SignupPageState extends State<SignupPage> {
             ),
 
             // login button
-
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: buttonColor,
-                minimumSize: const Size(200, 50),
-                maximumSize: const Size(200, 50),
-              ),
-              onPressed: () {
-                // add loading
-                // const CircularProgressIndicator(
-                //   color: Colors.amber,
-                // );
-                // add validation
-                if (_formKey.currentState!.validate()) {
-                  setState(() {
-                    name = nameController.text;
-                    email = emailController.text;
-                    phone = phoneController.text;
-                    password = passwordController.text;
-                  });
-                  // sign up user with email and password
-                  signup();
-                }
-              },
-              child: Text(
-                "Register".toUpperCase(),
-                style: TextStyle(
-                    color: backGroundColor,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold),
-              ),
-            ),
+            _isLoading
+                ? Center(
+                    child: CircularProgressIndicator(
+                    color: buttonColor,
+                  ))
+                : ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: buttonColor,
+                      minimumSize: const Size(200, 50),
+                      maximumSize: const Size(200, 50),
+                    ),
+                    onPressed: () {
+                      // add loading
+                      // const CircularProgressIndicator(
+                      //   color: Colors.amber,
+                      // );
+                      // add validation
+                      if (_formKey.currentState!.validate()) {
+                        setState(() {
+                          name = nameController.text;
+                          email = emailController.text;
+                          phone = phoneController.text;
+                          password = passwordController.text;
+                        });
+                        // sign up user with email and password
+                        signup();
+                      }
+                    },
+                    child: _isLoading
+                        ? CircularProgressIndicator(
+                            color: backGroundColor,
+                            strokeWidth: 3,
+                          )
+                        : Text(
+                            "Register".toUpperCase(),
+                            style: TextStyle(
+                                color: backGroundColor,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold),
+                          ),
+                  ),
 
             const SizedBox(
               height: 20,
