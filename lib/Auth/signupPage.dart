@@ -1,3 +1,4 @@
+import 'package:animated_snack_bar/animated_snack_bar.dart';
 import 'package:barber_shop/database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -76,28 +77,30 @@ class _SignupPageState extends State<SignupPage> {
         Navigator.push(context, MaterialPageRoute(builder: (context) {
           return const HomePage();
         }));
+
+        // show snackbar
+        AnimatedSnackBar.material(
+          'Logged In Successfully',
+          type: AnimatedSnackBarType.success,
+          duration: const Duration(seconds: 3),
+          mobileSnackBarPosition: MobileSnackBarPosition.top,
+        ).show(context);
       } on FirebaseAuthException catch (e) {
         if (e.code == 'weak-password') {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("Password is too weak"),
-              backgroundColor: Colors.redAccent,
-            ),
-          );
+          AnimatedSnackBar.material(
+            'Wrong Password',
+            type: AnimatedSnackBarType.error,
+          ).show(context);
         } else if (e.code == 'email-already-in-use') {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("Email is already in use"),
-              backgroundColor: Colors.redAccent,
-            ),
-          );
+          AnimatedSnackBar.material(
+            'Email already in use',
+            type: AnimatedSnackBarType.error,
+          ).show(context);
         } else if (e.code == 'invalid-email') {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("Email is invalid"),
-              backgroundColor: Colors.redAccent,
-            ),
-          );
+          AnimatedSnackBar.material(
+            'Invalid Email',
+            type: AnimatedSnackBarType.error,
+          ).show(context);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(

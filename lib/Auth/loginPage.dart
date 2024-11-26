@@ -1,7 +1,10 @@
+import 'package:animated_snack_bar/animated_snack_bar.dart';
 import 'package:barber_shop/Auth/signupPage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:contained_tab_bar_view/contained_tab_bar_view.dart';
 import '../resources/colors.dart';
+import '../screens/homepage.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -22,6 +25,66 @@ class _LoginPageState extends State<LoginPage> {
       textFieldFocusNode.canRequestFocus =
           false; // Prevents focus if tap on eye
     });
+  }
+
+  // form key
+  final _formKey = GlobalKey<FormState>();
+
+  // form values
+
+  String email = '';
+  String password = '';
+
+  // make controllers
+
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+
+  // login function
+  login() async {
+    if (_formKey.currentState!.validate()) {
+      try {
+        await FirebaseAuth.instance
+            .signInWithEmailAndPassword(email: email, password: password);
+
+        // Navigate to home page
+        Navigator.push(context, MaterialPageRoute(builder: (context) {
+          return const HomePage();
+        }));
+        // show snackbar
+
+        AnimatedSnackBar.material(
+          'Logged In Successfully',
+          type: AnimatedSnackBarType.success,
+          duration: const Duration(seconds: 3),
+          mobileSnackBarPosition: MobileSnackBarPosition.top,
+        ).show(context);
+      } on FirebaseAuthException catch (e) {
+        // if cant find user
+        if (e.code == 'user-not-found') {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("No user found for this email.")),
+          );
+        } else if (e.code == 'wrong-password') {
+          print('###### Wrong Password');
+          AnimatedSnackBar.material(
+            'Wrong Password',
+            type: AnimatedSnackBarType.error,
+          ).show(context);
+        } else if (e.code == 'invalid-credential') {
+          print('###### Invalid Email');
+          AnimatedSnackBar.material(
+            'Invalid Email or Password',
+            type: AnimatedSnackBarType.error,
+          ).show(context);
+        } else {
+          AnimatedSnackBar.material(
+            '${e.code}',
+            type: AnimatedSnackBarType.error,
+          ).show(context);
+        }
+      }
+    }
   }
 
   @override
@@ -73,18 +136,57 @@ class _LoginPageState extends State<LoginPage> {
                   // login form
                   Container(
                     padding: const EdgeInsets.only(top: 20),
-                    child: Column(
-                      children: [
-                        // email or phone number field
-                        TextFormField(
-                            style: TextStyle(color: textColor),
-                            keyboardType: TextInputType.emailAddress,
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          // email or phone number field
+                          TextFormField(
+                              controller: emailController,
+                              style: TextStyle(color: textColor),
+                              keyboardType: TextInputType.emailAddress,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Email or Phone number is required.';
+                                }
+                                return null;
+                              },
+                              decoration: InputDecoration(
+                                fillColor: boxColor,
+                                contentPadding: const EdgeInsets.all(20),
+                                filled: true,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: BorderSide.none,
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide:
+                                      BorderSide(color: textColor, width: 2.0),
+                                ),
+                                prefixIcon:
+                                    Icon(Icons.person, color: textColor),
+                                hintStyle: TextStyle(
+                                    color: textColor.withOpacity(0.5)),
+                                hintText: "Email or Phone number",
+                                labelStyle: TextStyle(color: textColor),
+                              )),
+                          const SizedBox(
+                            height: 20,
+                          ),
+
+                          // password field
+                          TextFormField(
+                            controller: passwordController,
+                            obscureText: _obscured,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                                return 'Email or Phone number is required.';
+                                return 'Enter a password';
                               }
                               return null;
                             },
+                            style: TextStyle(color: textColor),
+                            keyboardType: TextInputType.visiblePassword,
                             decoration: InputDecoration(
                               fillColor: boxColor,
                               contentPadding: const EdgeInsets.all(20),
@@ -98,95 +200,77 @@ class _LoginPageState extends State<LoginPage> {
                                 borderSide:
                                     BorderSide(color: textColor, width: 2.0),
                               ),
-                              prefixIcon: Icon(Icons.person, color: textColor),
+                              prefixIcon: Icon(Icons.lock, color: textColor),
+                              suffixIcon: Padding(
+                                padding: const EdgeInsets.fromLTRB(0, 0, 4, 0),
+                                child: GestureDetector(
+                                  onTap: _toggleObscured,
+                                  child: Icon(
+                                    _obscured
+                                        ? Icons.visibility_off_rounded
+                                        : Icons.visibility_rounded,
+                                    size: 24,
+                                    color: Colors.grey[700],
+                                  ),
+                                ),
+                              ),
                               hintStyle:
                                   TextStyle(color: textColor.withOpacity(0.5)),
-                              hintText: "Email or Phone number",
+                              hintText: "Password",
                               labelStyle: TextStyle(color: textColor),
-                            )),
-                        const SizedBox(
-                          height: 20,
-                        ),
+                            ),
+                          ),
 
-                        // password field
-                        TextFormField(
-                          obscureText: _obscured,
-                          style: TextStyle(color: textColor),
-                          keyboardType: TextInputType.visiblePassword,
-                          decoration: InputDecoration(
-                            fillColor: boxColor,
-                            contentPadding: const EdgeInsets.all(20),
-                            filled: true,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide.none,
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide:
-                                  BorderSide(color: textColor, width: 2.0),
-                            ),
-                            prefixIcon: Icon(Icons.lock, color: textColor),
-                            suffixIcon: Padding(
-                              padding: const EdgeInsets.fromLTRB(0, 0, 4, 0),
-                              child: GestureDetector(
-                                onTap: _toggleObscured,
-                                child: Icon(
-                                  _obscured
-                                      ? Icons.visibility_off_rounded
-                                      : Icons.visibility_rounded,
-                                  size: 24,
-                                  color: Colors.grey[700],
+                          // forget passworrd
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: <Widget>[
+                              TextButton(
+                                onPressed: () {},
+                                child: const Text(
+                                  "Forgot Password?",
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                  ),
                                 ),
                               ),
+                            ],
+                          ),
+
+                          // login button
+
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: buttonColor,
+                              minimumSize: const Size(200, 50),
+                              maximumSize: const Size(200, 50),
                             ),
-                            hintStyle:
-                                TextStyle(color: textColor.withOpacity(0.5)),
-                            hintText: "Password",
-                            labelStyle: TextStyle(color: textColor),
-                          ),
-                        ),
-
-                        // forget passworrd
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: <Widget>[
-                            TextButton(
-                              onPressed: () {},
-                              child: const Text(
-                                "Forgot Password?",
-                                style: TextStyle(
-                                  color: Colors.grey,
-                                ),
-                              ),
+                            onPressed: () {
+                              // firebase login
+                              if (_formKey.currentState!.validate()) {
+                                setState(() {
+                                  email = emailController.text.trim();
+                                  password = passwordController.text.trim();
+                                });
+                                login();
+                              }
+                            },
+                            child: Text(
+                              "Login".toUpperCase(),
+                              style: TextStyle(
+                                  color: backGroundColor,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold),
                             ),
-                          ],
-                        ),
-
-                        // login button
-
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: buttonColor,
-                            minimumSize: const Size(200, 50),
-                            maximumSize: const Size(200, 50),
                           ),
-                          onPressed: () {},
-                          child: Text(
-                            "Login".toUpperCase(),
-                            style: TextStyle(
-                                color: backGroundColor,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
 
                   // Sign up form
-                  SignupPage(),
+                  const SignupPage(),
                 ],
                 onChange: (index) => print(index),
               ),

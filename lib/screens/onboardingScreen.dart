@@ -1,3 +1,4 @@
+import 'package:barber_shop/Auth/loginPage.dart';
 import 'package:flutter/material.dart';
 
 import '../components/onboardingContent.dart';
@@ -65,7 +66,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
               ),
               onPressed: () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) {
-                  return const HomePage();
+                  return const LoginPage();
                 }));
               },
               child: Text(

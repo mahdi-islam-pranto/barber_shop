@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'Auth/loginPage.dart';
-import 'screens/onboardingScreen.dart';
+
+import 'screens/splashScreen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,7 +26,8 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: const Scaffold(
-        body: LoginPage(),
+        // if user currently logged in, go to home page, else go to login page
+        body: SplashScreen(),
       ),
     );
   }

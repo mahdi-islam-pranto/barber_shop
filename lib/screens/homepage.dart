@@ -1,5 +1,11 @@
+import 'dart:math';
+
+import 'package:barber_shop/Auth/fire_auth_services.dart';
 import 'package:barber_shop/components/shopNearYou.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import '../Auth/loginPage.dart';
 import '../components/servicesSection.dart';
 import '../resources/colors.dart';
 
@@ -21,8 +27,18 @@ class _HomePageState extends State<HomePage> {
             // welcome section
             Row(
               children: [
-                const CircleAvatar(
-                  radius: 28,
+                GestureDetector(
+                  onTap: () {
+                    FirebaseAuth.instance.signOut();
+                    debugPrint('########## User Logged Out');
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) {
+                      return const LoginPage();
+                    }));
+                  },
+                  child: const CircleAvatar(
+                    radius: 28,
+                  ),
                 ),
                 const SizedBox(width: 20),
                 const Column(
