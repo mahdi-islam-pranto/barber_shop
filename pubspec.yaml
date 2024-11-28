@@ -43,6 +43,7 @@ dependencies:
   firebase_auth: ^5.3.3
   firebase_storage: ^12.3.6
   animated_snack_bar: ^0.4.0
+  google_sign_in: ^6.2.2
   
 
 dev_dependencies:

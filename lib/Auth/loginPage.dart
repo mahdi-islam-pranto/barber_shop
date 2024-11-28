@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:contained_tab_bar_view/contained_tab_bar_view.dart';
 import '../resources/colors.dart';
 import '../screens/homepage.dart';
+import 'fire_auth_services.dart';
 import 'forgot_password.dart';
 
 class LoginPage extends StatefulWidget {
@@ -88,13 +89,13 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  int _currentIndex = 0;
+  // login with google
 
-  void _navigateToSignup() {
-    setState(() {
-      _currentIndex = 1;
-    });
+  loginWithGoogle() async {
+    try {} catch (e) {}
   }
+
+  int _currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -294,6 +295,47 @@ class _LoginPageState extends State<LoginPage> {
                                   fontWeight: FontWeight.bold),
                             ),
                           ),
+
+                          // google sign in buttons
+                          Container(
+                              padding: const EdgeInsets.only(top: 20),
+                              child: Column(
+                                children: [
+                                  Text("Or Sign in with",
+                                      style: TextStyle(
+                                          color: textColor, fontSize: 16)),
+                                  const SizedBox(
+                                    height: 10,
+                                  ),
+
+                                  // google sign / email in button
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      GestureDetector(
+                                        onTap: () {
+                                          // login with google
+                                          FireAuthServices()
+                                              .signInWithGoogle(context);
+                                        },
+                                        child: CircleAvatar(
+                                          backgroundColor: Colors.transparent,
+                                          backgroundImage: Image.asset(
+                                                  'assets/images/google.png')
+                                              .image,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 20),
+                                      CircleAvatar(
+                                        backgroundColor: Colors.transparent,
+                                        backgroundImage: Image.asset(
+                                                'assets/images/apple.png')
+                                            .image,
+                                      ),
+                                    ],
+                                  )
+                                ],
+                              )),
                         ],
                       ),
                     ),
