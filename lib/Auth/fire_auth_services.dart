@@ -1,9 +1,11 @@
 import 'package:animated_snack_bar/animated_snack_bar.dart';
+import 'package:barber_shop/components/customProgressIndecator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:simple_fontellico_progress_dialog/simple_fontico_loading.dart';
 
 import '../screens/homepage.dart';
 
@@ -23,6 +25,12 @@ class FireAuthServices {
 
   Future<void> signupWithGoogle(BuildContext context) async {
     try {
+      // add loader
+      // show loading
+      CustomProgress customProgress = CustomProgress(context);
+      customProgress.showDialog(
+          "Please wait", SimpleFontelicoProgressDialogType.spinner);
+
       final GoogleSignIn googleSignIn = GoogleSignIn();
       final GoogleSignInAccount? googleSignInAccount =
           await googleSignIn.signIn();
@@ -76,9 +84,16 @@ class FireAuthServices {
         // if user is not null we simply call the MaterialpageRoute,
 
         if (result != null) {
+          customProgress.hideDialog();
           Navigator.pushReplacement(
               context, MaterialPageRoute(builder: (context) => HomePage()));
         } // if result not null we simply call the MaterialpageRoute,
+        AnimatedSnackBar.material(
+          'Logged In Successfully',
+          type: AnimatedSnackBarType.success,
+          duration: const Duration(seconds: 3),
+          mobileSnackBarPosition: MobileSnackBarPosition.top,
+        ).show(context);
         // for go to the HomePage screen
       }
     } catch (e) {

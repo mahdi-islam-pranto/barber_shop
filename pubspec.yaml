@@ -44,6 +44,7 @@ dependencies:
   firebase_storage: ^12.3.6
   animated_snack_bar: ^0.4.0
   google_sign_in: ^6.2.2
+  simple_fontellico_progress_dialog: ^0.3.0
   
 
 dev_dependencies:

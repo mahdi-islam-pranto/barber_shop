@@ -3,6 +3,8 @@ import 'package:barber_shop/Auth/signupPage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:contained_tab_bar_view/contained_tab_bar_view.dart';
+import 'package:simple_fontellico_progress_dialog/simple_fontico_loading.dart';
+import '../components/customProgressIndecator.dart';
 import '../resources/colors.dart';
 import '../screens/homepage.dart';
 import 'fire_auth_services.dart';
@@ -45,9 +47,16 @@ class _LoginPageState extends State<LoginPage> {
   // login function
   login() async {
     if (_formKey.currentState!.validate()) {
+      // show loading
+      CustomProgress customProgress = CustomProgress(context);
+      customProgress.showDialog(
+          "Please wait", SimpleFontelicoProgressDialogType.spinner);
       try {
         await FirebaseAuth.instance
             .signInWithEmailAndPassword(email: email, password: password);
+
+        // hide loading
+        customProgress.hideDialog();
 
         // Navigate to home page
         Navigator.push(context, MaterialPageRoute(builder: (context) {
@@ -317,7 +326,6 @@ class _LoginPageState extends State<LoginPage> {
                                           // login with google
                                           FireAuthServices()
                                               .signupWithGoogle(context);
-                                          // save user's data in the user collection firestore
                                         },
                                         child: CircleAvatar(
                                           backgroundColor: Colors.transparent,

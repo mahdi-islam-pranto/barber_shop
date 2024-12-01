@@ -21,6 +21,11 @@ class HomePage extends StatefulWidget {
 FirebaseAuth auth = FirebaseAuth.instance;
 User? user = auth.currentUser;
 
+String? email = user?.email;
+String? name = user?.displayName;
+String? photoUrl = user?.photoURL;
+String? uid = user?.uid;
+
 class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
@@ -42,20 +47,29 @@ class _HomePageState extends State<HomePage> {
                       return const LoginPage();
                     }));
                   },
-                  child: const CircleAvatar(
-                    radius: 28,
+                  child: CircleAvatar(
+                    backgroundColor: textColor,
+                    radius: 25,
+                    backgroundImage: photoUrl == null
+                        ? const AssetImage("assets/images/user.png")
+                        : NetworkImage(user!.photoURL.toString()),
                   ),
                 ),
                 const SizedBox(width: 20),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text("Welcome!", style: TextStyle(fontSize: 15)),
-                    Text(user!.displayName.toString(),
-                        style: const TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold))
-                  ],
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text("Welcome!", style: TextStyle(fontSize: 15)),
+                      Text(user!.email.toString(),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                          softWrap: false,
+                          style: const TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold))
+                    ],
+                  ),
                 ),
                 const Spacer(),
                 IconButton(
