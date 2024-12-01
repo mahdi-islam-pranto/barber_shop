@@ -1,45 +1,91 @@
+import 'package:animated_snack_bar/animated_snack_bar.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../screens/homepage.dart';
 
 class FireAuthServices {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+// creating firebase instance
+  final FirebaseAuth auth = FirebaseAuth.instance;
 
   // make signup with email and password function
   // implemented in login page
 
   // login with google function
   getCurrentUser() async {
-    return await _auth.currentUser;
+    return await auth.currentUser;
   }
 
-  signInWithGoogle(BuildContext context) async {
-    final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
-    final GoogleSignIn googleSignIn = GoogleSignIn();
+  // function to implement the google signin
 
-    final GoogleSignInAccount? googleSignInAccount =
-        await googleSignIn.signIn();
+  Future<void> signupWithGoogle(BuildContext context) async {
+    try {
+      final GoogleSignIn googleSignIn = GoogleSignIn();
+      final GoogleSignInAccount? googleSignInAccount =
+          await googleSignIn.signIn();
+      if (googleSignInAccount != null) {
+        final GoogleSignInAuthentication googleSignInAuthentication =
+            await googleSignInAccount.authentication;
+        final AuthCredential authCredential = GoogleAuthProvider.credential(
+            idToken: googleSignInAuthentication.idToken,
+            accessToken: googleSignInAuthentication.accessToken);
 
-    final GoogleSignInAuthentication? googleSignInAuthentication =
-        await googleSignInAccount?.authentication;
+        // Getting users credential
+        UserCredential result = await auth.signInWithCredential(authCredential);
+        User? user = result.user;
+        print(user?.displayName.toString());
 
-    final AuthCredential credential = GoogleAuthProvider.credential(
-        idToken: googleSignInAuthentication?.idToken,
-        accessToken: googleSignInAuthentication?.accessToken);
+        print(user?..uid.toString());
 
-    UserCredential result = await firebaseAuth.signInWithCredential(credential);
+        // if user is not exists in firestore, add user
+        if (user != null) {
+          final userDocs = await FirebaseFirestore.instance
+              .collection("users")
+              .doc(user.uid)
+              .get();
+          if (!userDocs.exists) {
+            await FirebaseFirestore.instance
+                .collection("users")
+                .doc(user.uid)
+                .set({
+              "id": user.uid,
+              "name": user.displayName,
+              "phone": user.phoneNumber,
+              "email": user.email,
+            });
+          }
+        }
 
-    User? userDetails = result.user;
+        // put this user data to firestore
+        // await FirebaseFirestore.instance.collection("users").doc(user?.uid).set({
+        //   "id": user?.uid.toString(),
+        //   "name": user?.displayName.toString(),
+        //   "phone": user?.phoneNumber.toString(),
+        //   "email": user?.email.toString(),
+        // });
 
-    if (result != null) {
-      Map<String, dynamic> userInfoMap = {
-        "email": userDetails!.email,
-        "name": userDetails.displayName,
-        "imgUrl": userDetails.photoURL,
-        "id": userDetails.uid
-      };
+        // save the user data to shared preferences
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setString("id", user!.uid.toString());
+        prefs.setString("name", user.displayName.toString());
+        prefs.setString("email", user.email.toString());
 
-      print(userInfoMap);
+        // if user is not null we simply call the MaterialpageRoute,
+
+        if (result != null) {
+          Navigator.pushReplacement(
+              context, MaterialPageRoute(builder: (context) => HomePage()));
+        } // if result not null we simply call the MaterialpageRoute,
+        // for go to the HomePage screen
+      }
+    } catch (e) {
+      // show the error in the snackbar
+      AnimatedSnackBar.material(
+          "User Not Found. Try to login with email and password",
+          type: AnimatedSnackBarType.error);
     }
   }
 }

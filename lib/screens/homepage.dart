@@ -5,6 +5,7 @@ import 'package:barber_shop/components/shopNearYou.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
 import '../Auth/loginPage.dart';
 import '../components/servicesSection.dart';
 import '../resources/colors.dart';
@@ -15,6 +16,10 @@ class HomePage extends StatefulWidget {
   @override
   State<HomePage> createState() => _HomePageState();
 }
+
+// get current user data
+FirebaseAuth auth = FirebaseAuth.instance;
+User? user = auth.currentUser;
 
 class _HomePageState extends State<HomePage> {
   @override
@@ -42,13 +47,13 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 const SizedBox(width: 20),
-                const Column(
+                Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Welcome", style: TextStyle(fontSize: 15)),
-                    Text("Mahdi Islam Pranto",
-                        style: TextStyle(
+                    const Text("Welcome!", style: TextStyle(fontSize: 15)),
+                    Text(user!.displayName.toString(),
+                        style: const TextStyle(
                             fontSize: 20, fontWeight: FontWeight.bold))
                   ],
                 ),

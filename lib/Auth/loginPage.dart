@@ -316,7 +316,8 @@ class _LoginPageState extends State<LoginPage> {
                                         onTap: () {
                                           // login with google
                                           FireAuthServices()
-                                              .signInWithGoogle(context);
+                                              .signupWithGoogle(context);
+                                          // save user's data in the user collection firestore
                                         },
                                         child: CircleAvatar(
                                           backgroundColor: Colors.transparent,
@@ -331,6 +332,15 @@ class _LoginPageState extends State<LoginPage> {
                                         backgroundImage: Image.asset(
                                                 'assets/images/apple.png')
                                             .image,
+                                      ),
+                                      const SizedBox(width: 20),
+                                      CircleAvatar(
+                                        backgroundColor: Colors.transparent,
+                                        child: Icon(
+                                          Icons.facebook,
+                                          color: textColor,
+                                          size: 42,
+                                        ),
                                       ),
                                     ],
                                   )
