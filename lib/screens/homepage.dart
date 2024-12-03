@@ -1,11 +1,7 @@
-import 'dart:math';
-
-import 'package:barber_shop/Auth/fire_auth_services.dart';
 import 'package:barber_shop/components/shopNearYou.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get_connect/http/src/utils/utils.dart';
 import '../Auth/loginPage.dart';
 import '../components/servicesSection.dart';
 import '../resources/colors.dart';
@@ -48,7 +44,7 @@ class _HomePageState extends State<HomePage> {
                     }));
                   },
                   child: CircleAvatar(
-                    backgroundColor: textColor,
+                    backgroundColor: backGroundColor,
                     radius: 25,
                     backgroundImage: photoUrl == null
                         ? const AssetImage("assets/images/user.png")
@@ -56,21 +52,68 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 const SizedBox(width: 20),
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text("Welcome!", style: TextStyle(fontSize: 15)),
-                      Text(user!.email.toString(),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                          softWrap: false,
-                          style: const TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold))
-                    ],
-                  ),
-                ),
+                // get current user data from firestore
+                StreamBuilder(
+                    stream: FirebaseFirestore.instance
+                        .collection("users")
+                        .doc(uid)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        final userData =
+                            snapshot.data!.data() as Map<String, dynamic>;
+                        return Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text("Welcome!",
+                                  style: TextStyle(fontSize: 15)),
+                              Text(userData["name"],
+                                  maxLines: 1,
+                                  softWrap: false,
+                                  style: const TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold))
+                            ],
+                          ),
+                        );
+                      } else if (snapshot.hasError) {
+                        return Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text("Welcome!",
+                                  style: TextStyle(fontSize: 15)),
+                              Text(name!,
+                                  maxLines: 1,
+                                  softWrap: false,
+                                  style: const TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold))
+                            ],
+                          ),
+                        );
+                      } else {
+                        return const Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text("Welcome!", style: TextStyle(fontSize: 15)),
+                              Text("user",
+                                  maxLines: 1,
+                                  softWrap: false,
+                                  style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold))
+                            ],
+                          ),
+                        );
+                      }
+                    }),
+
                 const Spacer(),
                 IconButton(
                     onPressed: () {},

@@ -80,7 +80,7 @@ class _SignupPageState extends State<SignupPage> {
 
         // show snackbar
         AnimatedSnackBar.material(
-          'Logged In Successfully',
+          'Account created Successfully',
           type: AnimatedSnackBarType.success,
           duration: const Duration(seconds: 3),
           mobileSnackBarPosition: MobileSnackBarPosition.top,

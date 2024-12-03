@@ -71,6 +71,7 @@ class _LoginPageState extends State<LoginPage> {
           mobileSnackBarPosition: MobileSnackBarPosition.top,
         ).show(context);
       } on FirebaseAuthException catch (e) {
+        customProgress.hideDialog();
         // if cant find user
         if (e.code == 'user-not-found') {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -96,12 +97,6 @@ class _LoginPageState extends State<LoginPage> {
         }
       }
     }
-  }
-
-  // login with google
-
-  loginWithGoogle() async {
-    try {} catch (e) {}
   }
 
   int _currentIndex = 0;
