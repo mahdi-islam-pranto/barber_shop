@@ -2,7 +2,9 @@ import 'package:barber_shop/components/shopNearYou.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:popover/popover.dart';
 import '../Auth/loginPage.dart';
+import '../components/popUpMenuItems.dart';
 import '../components/servicesSection.dart';
 import '../resources/colors.dart';
 
@@ -16,7 +18,6 @@ class HomePage extends StatefulWidget {
 // get current user data
 FirebaseAuth auth = FirebaseAuth.instance;
 User? user = auth.currentUser;
-
 String? email = user?.email;
 String? name = user?.displayName;
 String? photoUrl = user?.photoURL;
@@ -33,15 +34,18 @@ class _HomePageState extends State<HomePage> {
             // welcome section
             Row(
               children: [
+                // user image
+
                 GestureDetector(
                   onTap: () {
-                    FirebaseAuth.instance.signOut();
-
-                    debugPrint('########## User Logged Out');
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) {
-                      return const LoginPage();
-                    }));
+                    // open pop up dialog
+                    showPopover(
+                      context: context,
+                      bodyBuilder: (context) => const PopUpMenuItems(),
+                      onPop: () => print('Popover was popped!'),
+                      width: 200,
+                      height: 400,
+                    );
                   },
                   child: CircleAvatar(
                     backgroundColor: backGroundColor,
@@ -70,23 +74,6 @@ class _HomePageState extends State<HomePage> {
                               const Text("Welcome!",
                                   style: TextStyle(fontSize: 15)),
                               Text(userData["name"],
-                                  maxLines: 1,
-                                  softWrap: false,
-                                  style: const TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold))
-                            ],
-                          ),
-                        );
-                      } else if (snapshot.hasError) {
-                        return Expanded(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text("Welcome!",
-                                  style: TextStyle(fontSize: 15)),
-                              Text(name!,
                                   maxLines: 1,
                                   softWrap: false,
                                   style: const TextStyle(
