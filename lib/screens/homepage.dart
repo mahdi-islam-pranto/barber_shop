@@ -36,23 +36,29 @@ class _HomePageState extends State<HomePage> {
               children: [
                 // user image
 
-                GestureDetector(
-                  onTap: () {
-                    // open pop up dialog
-                    showPopover(
-                      context: context,
-                      bodyBuilder: (context) => const PopUpMenuItems(),
-                      onPop: () => print('Popover was popped!'),
-                      width: 200,
-                      height: 400,
-                    );
-                  },
-                  child: CircleAvatar(
-                    backgroundColor: backGroundColor,
-                    radius: 25,
-                    backgroundImage: photoUrl == null
-                        ? const AssetImage("assets/images/user.png")
-                        : NetworkImage(user!.photoURL.toString()),
+                Builder(
+                  builder: (context) => GestureDetector(
+                    onTap: () {
+                      // open pop up dialog
+                      showPopover(
+                        context: context,
+                        bodyBuilder: (context) => const PopOverMenuItems(),
+                        onPop: () => print('Popover was popped!'),
+                        direction: PopoverDirection.bottom,
+                        backgroundColor: Color(0xff2F3646),
+                        width: 250,
+                        height: 200,
+                        arrowHeight: 15,
+                        arrowWidth: 20,
+                      );
+                    },
+                    child: CircleAvatar(
+                      backgroundColor: backGroundColor,
+                      radius: 25,
+                      backgroundImage: photoUrl == null
+                          ? const AssetImage("assets/images/user.png")
+                          : NetworkImage(user!.photoURL.toString()),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 20),
@@ -101,7 +107,6 @@ class _HomePageState extends State<HomePage> {
                       }
                     }),
 
-                const Spacer(),
                 IconButton(
                     onPressed: () {},
                     icon: Icon(
