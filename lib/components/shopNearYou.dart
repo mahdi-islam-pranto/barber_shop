@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
 
 import '../resources/colors.dart';
 
@@ -8,107 +9,234 @@ class ShopNearYou extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        padding: const EdgeInsets.only(top: 20),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
+        padding: const EdgeInsets.only(
+          top: 20,
+        ),
+        height: MediaQuery.of(context).size.height / 5.2,
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          children: <Widget>[
             // all shops each
-            Column(
-              children: [
-                // circle avatar
-                CircleAvatar(
-                  radius: 38,
-                  backgroundColor: buttonColor,
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Image.asset(
-                          "assets/images/shop.png",
+            Container(
+              decoration: BoxDecoration(
+                color: boxColor,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                children: [
+                  // circle avatar
+                  CircleAvatar(
+                    radius: 28,
+                    backgroundColor: buttonColor,
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Image.asset(
+                            "assets/images/shop.png",
+                          ),
                         ),
+                      ],
+                    ),
+                  ),
+
+                  // shop name, location, reviwes text
+
+                  const SizedBox(
+                    height: 3,
+                  ),
+
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width /
+                        3.5, // make width 120
+
+                    child: const Text("Look Change Saloon big text",
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        style: TextStyle(fontSize: 14)),
+                  ),
+
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width /
+                        3.5, // make width 120
+                    child: const Text("Mohammadpur, Dhaka",
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        style: TextStyle(fontSize: 13, color: Colors.white30)),
+                  ),
+
+                  const SizedBox(
+                    height: 3,
+                  ),
+
+                  const Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.star,
+                        color: Colors.yellow,
+                        size: 15,
                       ),
+                      SizedBox(width: 5),
+                      Text("4.5", style: TextStyle(fontSize: 16)),
                     ],
                   ),
-                ),
-
-                // shop name, location, reviwes text
-
-                const SizedBox(
-                  height: 3,
-                ),
-
-                const Text("Look Change Saloon",
-                    style: TextStyle(fontSize: 16)),
-
-                const Text("Mohammadpur, Dhaka",
-                    style: TextStyle(fontSize: 14, color: Colors.white30)),
-
-                const SizedBox(
-                  height: 3,
-                ),
-
-                const Row(
-                  children: [
-                    Icon(
-                      Icons.star,
-                      color: Colors.yellow,
-                      size: 15,
-                    ),
-                    SizedBox(width: 5),
-                    Text("4.5", style: TextStyle(fontSize: 16)),
-                  ],
-                ),
-              ],
+                ],
+              ),
             ),
             const SizedBox(width: 20),
 
             // all shops each
-            Column(
-              children: [
-                // circle avatar
-                CircleAvatar(
-                  radius: 38,
-                  backgroundColor: buttonColor,
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Image.asset(
-                          "assets/images/shop.png",
+            Container(
+              decoration: BoxDecoration(
+                color: boxColor,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                children: [
+                  // circle avatar
+                  CircleAvatar(
+                    radius: 28,
+                    backgroundColor: buttonColor,
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Image.asset(
+                            "assets/images/shop.png",
+                          ),
                         ),
+                      ],
+                    ),
+                  ),
+
+                  // shop name, location, reviwes text
+
+                  const SizedBox(
+                    height: 3,
+                  ),
+
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width /
+                        3.5, // make width 120
+
+                    child: const Text("Trim Haircut",
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        style: TextStyle(fontSize: 14)),
+                  ),
+
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width /
+                        3.5, // make width 120
+                    child: const Text("Dhanmondi, Dhaka",
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        style: TextStyle(fontSize: 13, color: Colors.white30)),
+                  ),
+
+                  const SizedBox(
+                    height: 3,
+                  ),
+
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.star,
+                        color: Colors.yellow,
+                        size: 15,
                       ),
+                      SizedBox(width: 5),
+                      Text("4.3", style: TextStyle(fontSize: 16)),
                     ],
                   ),
-                ),
-
-                // shop name, location, reviwes text
-
-                const SizedBox(
-                  height: 3,
-                ),
-
-                const Text("Trim Haircut", style: TextStyle(fontSize: 16)),
-
-                const Text("Dhanmondi, Dhaka",
-                    style: TextStyle(fontSize: 14, color: Colors.white30)),
-
-                const SizedBox(
-                  height: 3,
-                ),
-
-                const Row(
-                  children: [
-                    Icon(
-                      Icons.star,
-                      color: Colors.yellow,
-                      size: 15,
-                    ),
-                    SizedBox(width: 5),
-                    Text("4.3", style: TextStyle(fontSize: 16)),
-                  ],
-                ),
-              ],
+                ],
+              ),
             ),
+            const SizedBox(width: 20),
+
+            Container(
+              decoration: BoxDecoration(
+                color: boxColor,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // circle avatar
+                  CircleAvatar(
+                    radius: 28,
+                    backgroundColor: buttonColor,
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Image.asset(
+                            "assets/images/shop.png",
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // shop name, location, reviwes text
+
+                  const SizedBox(
+                    height: 3,
+                  ),
+
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width /
+                        3.5, // make width 120
+
+                    child: const Text("Look Change Saloon",
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        style: TextStyle(fontSize: 14)),
+                  ),
+
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width /
+                        3.5, // make width 120
+                    child: const Text("Uttra, Dhaka",
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        style: TextStyle(fontSize: 13, color: Colors.white30)),
+                  ),
+
+                  const SizedBox(
+                    height: 3,
+                  ),
+
+                  const Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.star,
+                        color: Colors.yellow,
+                        size: 15,
+                      ),
+                      SizedBox(width: 5),
+                      Text("4.5", style: TextStyle(fontSize: 16)),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 20),
           ],
         ));
   }

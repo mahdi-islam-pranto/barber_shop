@@ -77,24 +77,33 @@ class PopOverMenuItems extends StatelessWidget {
                             color: Colors.black,
                           )),
                       onPressed: () {
-                        // logout user
-                        FirebaseAuth.instance.signOut();
-                        developer.log("User Logged Out");
-                        print("############# User Logged Out");
-                        // navigate to login page
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const LoginPage(),
-                          ),
-                        );
-                        // show success message
-                        AnimatedSnackBar.material(
-                          'User Logged Out',
-                          type: AnimatedSnackBarType.success,
-                          duration: const Duration(seconds: 3),
-                          mobileSnackBarPosition: MobileSnackBarPosition.top,
-                        ).show(context);
+                        try {
+                          // logout user
+                          FirebaseAuth.instance.signOut();
+                          developer.log("User Logged Out");
+                          print("############# User Logged Out");
+
+                          FirebaseAuth.instance.userChanges().listen((user) {
+                            if (user == null) {
+                              developer.log("User Logged Out");
+                              print("############# User Logged Out");
+                            }
+                          });
+                          // navigate to login page
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const LoginPage()));
+                          // show success message
+                          AnimatedSnackBar.material(
+                            'User Logged Out',
+                            type: AnimatedSnackBarType.success,
+                            duration: const Duration(seconds: 3),
+                            mobileSnackBarPosition: MobileSnackBarPosition.top,
+                          ).show(context);
+                        } catch (e) {
+                          print("Error:" + e.toString());
+                        }
                       })
                 ],
               );

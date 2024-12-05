@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:popover/popover.dart';
-import '../Auth/loginPage.dart';
+
 import '../components/popUpMenuItems.dart';
 import '../components/servicesSection.dart';
 import '../resources/colors.dart';
@@ -18,12 +18,22 @@ class HomePage extends StatefulWidget {
 // get current user data
 FirebaseAuth auth = FirebaseAuth.instance;
 User? user = auth.currentUser;
+
 String? email = user?.email;
 String? name = user?.displayName;
 String? photoUrl = user?.photoURL;
 String? uid = user?.uid;
 
 class _HomePageState extends State<HomePage> {
+  // init state
+  @override
+  // void initState() {
+  //   // TODO: implement initState
+  //   super.initState();
+  //   print('User ID init: $uid');
+  //   print('user email: $email');
+  // }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -72,6 +82,8 @@ class _HomePageState extends State<HomePage> {
                       if (snapshot.hasData) {
                         final userData =
                             snapshot.data!.data() as Map<String, dynamic>;
+                        print('user name: ${userData["name"]}');
+                        print('user email: ${userData["email"]}');
                         return Expanded(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.start,
