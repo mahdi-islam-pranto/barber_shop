@@ -82,8 +82,8 @@ class _HomePageState extends State<HomePage> {
                       if (snapshot.hasData) {
                         final userData =
                             snapshot.data!.data() as Map<String, dynamic>;
-                        print('user name: ${userData["name"]}');
-                        print('user email: ${userData["email"]}');
+                        // print('user name: ${userData["name"]}');
+                        // print('user email: ${userData["email"]}');
                         return Expanded(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.start,
@@ -155,9 +155,18 @@ class _HomePageState extends State<HomePage> {
 
             const Align(
                 alignment: Alignment.centerLeft,
-                child: Text("BEST SHOPS NEAR YOU",
-                    style:
-                        TextStyle(fontSize: 21, fontWeight: FontWeight.bold))),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("BEST SHOPS NEAR YOU",
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold)),
+                    Text("SEE ALL",
+                        style: TextStyle(
+                          fontSize: 12,
+                        )),
+                  ],
+                )),
 
             const ShopNearYou(),
 

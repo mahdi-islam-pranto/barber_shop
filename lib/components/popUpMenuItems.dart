@@ -1,12 +1,10 @@
-import 'dart:math';
-
 import 'package:animated_snack_bar/animated_snack_bar.dart';
 import 'package:barber_shop/Auth/loginPage.dart';
 import 'package:barber_shop/resources/colors.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get_connect/http/src/utils/utils.dart';
+
 import '../screens/homepage.dart';
 
 import 'dart:developer' as developer;
@@ -30,12 +28,6 @@ class PopOverMenuItems extends StatelessWidget {
                 // mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const Text("User Profile",
-                      maxLines: 1,
-                      softWrap: false,
-                      style: TextStyle(
-                        fontSize: 18,
-                      )),
                   const SizedBox(
                     height: 20,
                   ),

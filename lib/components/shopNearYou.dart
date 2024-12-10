@@ -33,6 +33,15 @@ class ShopNearYou extends StatelessWidget {
             SizedBox(width: 20),
 
             ShopOverview(
+              shopName: 'Diamond Saloon',
+              location: "Uttra, Dhaka",
+              rating: "4.4",
+              imagePath: "assets/images/shop.png",
+            ),
+
+            SizedBox(width: 20),
+
+            ShopOverview(
               shopName: 'Trim Haircut',
               location: "Dhanmondi, Dhaka",
               rating: "4.5",
