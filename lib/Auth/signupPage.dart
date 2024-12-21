@@ -63,6 +63,7 @@ class _SignupPageState extends State<SignupPage> {
           "name": nameController.text.trim(),
           "phone": phoneController.text.trim(),
           "email": emailController.text.trim(),
+          "user-type": "customer",
         };
         // add this user to firestore
         await DatabaseService()
@@ -88,7 +89,7 @@ class _SignupPageState extends State<SignupPage> {
       } on FirebaseAuthException catch (e) {
         if (e.code == 'weak-password') {
           AnimatedSnackBar.material(
-            'Wrong Password',
+            'weak Password, make it more strong',
             type: AnimatedSnackBarType.error,
           ).show(context);
         } else if (e.code == 'email-already-in-use') {

@@ -1,5 +1,7 @@
 import 'package:animated_snack_bar/animated_snack_bar.dart';
 import 'package:barber_shop/Auth/signupPage.dart';
+import 'package:barber_shop/BarberScreens/barberHomePage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:contained_tab_bar_view/contained_tab_bar_view.dart';
@@ -58,10 +60,39 @@ class _LoginPageState extends State<LoginPage> {
         // hide loading
         customProgress.hideDialog();
 
-        // Navigate to home page
-        Navigator.push(context, MaterialPageRoute(builder: (context) {
-          return const HomePage();
-        }));
+        // clear text fields
+        emailController.clear();
+        passwordController.clear();
+
+        // Fetch the user's role from Firestore to determine access level
+        User? user = FirebaseAuth.instance.currentUser;
+        DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user!.uid)
+            .get();
+        String userRole = userSnapshot.get('user-type');
+
+        // if user is customer, navigate to customer home page
+        if (userRole == 'customer') {
+          // Navigate to home page
+          Navigator.push(context, MaterialPageRoute(builder: (context) {
+            return const HomePage();
+          }));
+        }
+
+        // if user is barber, navigate to barber home page
+        if (userRole == 'barber') {
+          // Navigate to home page
+          Navigator.push(context, MaterialPageRoute(builder: (context) {
+            return const Barberhomepage();
+          }));
+        } else {
+          // Navigate to home page
+          Navigator.push(context, MaterialPageRoute(builder: (context) {
+            return const HomePage();
+          }));
+        }
+
         // show snackbar
 
         AnimatedSnackBar.material(

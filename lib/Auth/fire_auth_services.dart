@@ -63,6 +63,7 @@ class FireAuthServices {
               "name": user.displayName,
               "phone": user.phoneNumber,
               "email": user.email,
+              "user-type": "customer",
             });
           }
         }
