@@ -3,8 +3,11 @@ import 'dart:async';
 import 'package:barber_shop/resources/colors.dart';
 import 'package:barber_shop/screens/homepage.dart';
 import 'package:barber_shop/screens/onboardingScreen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
+import '../BarberScreens/barberHomePage.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -72,7 +75,7 @@ class _SplashScreenState extends State<SplashScreen> {
 }
 
 class SplashServices {
-  void isLogin(BuildContext context) {
+  Future<void> isLogin(BuildContext context) async {
     //user already logged in or not
     //firebase init
     final auth = FirebaseAuth.instance;
@@ -80,13 +83,37 @@ class SplashServices {
 
 // user logged in
     if (user != null) {
-      Timer(const Duration(seconds: 3), () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const HomePage(),
-          ),
-        );
+      Timer(const Duration(seconds: 3), () async {
+        // check user is customer or barber
+
+        // Fetch the user's role from Firestore to determine access level
+        User? user = FirebaseAuth.instance.currentUser;
+        DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user!.uid)
+            .get();
+        String userRole = userSnapshot.get('user-type');
+
+        // if user is customer, navigate to customer home page
+        if (userRole == 'customer') {
+          // Navigate to home page
+          Navigator.push(context, MaterialPageRoute(builder: (context) {
+            return const HomePage();
+          }));
+        }
+
+        // if user is barber, navigate to barber home page
+        if (userRole == 'barber') {
+          // Navigate to home page
+          Navigator.push(context, MaterialPageRoute(builder: (context) {
+            return const Barberhomepage();
+          }));
+        } else {
+          // Navigate to home page
+          Navigator.push(context, MaterialPageRoute(builder: (context) {
+            return const HomePage();
+          }));
+        }
       });
     } else {
       // user not logged in
