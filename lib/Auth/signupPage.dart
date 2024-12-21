@@ -3,6 +3,7 @@ import 'package:barber_shop/database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../BarberScreens/barberSignUpPage.dart';
 import '../resources/colors.dart';
 import '../screens/homepage.dart';
 
@@ -311,8 +312,46 @@ class _SignupPageState extends State<SignupPage> {
                   ),
 
             const SizedBox(
-              height: 20,
-            )
+              height: 10,
+            ),
+
+            Text("Are you a barber?", style: TextStyle(color: textColor)),
+
+            const SizedBox(
+              height: 10,
+            ),
+
+            // Sign up as a barber
+            _isLoading
+                ? Center(
+                    child: CircularProgressIndicator(
+                    color: buttonColor,
+                  ))
+                : ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: boxColor,
+                      minimumSize: const Size(250, 50),
+                      maximumSize: const Size(250, 50),
+                    ),
+                    onPressed: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
+                        return const BarberSignupPage();
+                      }));
+                    },
+                    child: _isLoading
+                        ? CircularProgressIndicator(
+                            color: backGroundColor,
+                            strokeWidth: 3,
+                          )
+                        : Text(
+                            "Register as a barber".toUpperCase(),
+                            style: TextStyle(
+                                color: textColor,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold),
+                          ),
+                  ),
           ],
         ),
       ),
