@@ -5,7 +5,9 @@ import 'package:popover/popover.dart';
 
 import '../components/popUpMenuItems.dart';
 
+import '../components/shopNearYou.dart';
 import '../resources/colors.dart';
+import 'addShopForm.dart';
 
 class Barberhomepage extends StatefulWidget {
   const Barberhomepage({super.key});
@@ -129,28 +131,69 @@ class _BarberhomepageState extends State<Barberhomepage> {
 
             // Services Section
 
+            // Added Barber Shops near you section
+
+            Align(
+                alignment: Alignment.centerLeft,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text("MY BARBER SHOPS",
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold)),
+                    ElevatedButton(
+                      style: ButtonStyle(
+                        backgroundColor:
+                            WidgetStateProperty.all<Color>(boxColor),
+                      ),
+                      onPressed: () {
+                        // navigate to add shop form screen
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) {
+                          return const AddShopForm();
+                        }));
+                      },
+                      child: Text("ADD SHOP",
+                          style: TextStyle(
+                            color: textColor,
+                            fontSize: 12,
+                          )),
+                    ),
+                  ],
+                )),
+
+            const ShopNearYou(),
+
             const SizedBox(height: 40),
 
-            // Added Barber Shops near you section
+            // My added services
 
             const Align(
                 alignment: Alignment.centerLeft,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text("MY BARBER SHOPS",
+                    Text("MY SERVICES",
                         style: TextStyle(
                             fontSize: 20, fontWeight: FontWeight.bold)),
-                    Text("SEE ALL",
-                        style: TextStyle(
-                          fontSize: 12,
-                        )),
                   ],
                 )),
 
-            const SizedBox(height: 40),
+            const SizedBox(
+              height: 40,
+            ),
 
-            // book Appointment section
+            // booked appointments
+            const Align(
+                alignment: Alignment.centerLeft,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("BOOKED APPOINTMENTS",
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold)),
+                  ],
+                )),
           ],
         ),
       ),

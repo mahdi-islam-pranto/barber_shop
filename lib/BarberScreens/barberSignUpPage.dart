@@ -1,11 +1,11 @@
 import 'package:animated_snack_bar/animated_snack_bar.dart';
 import 'package:barber_shop/database.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../resources/colors.dart';
-import '../screens/homepage.dart';
+
 import 'barberHomePage.dart';
 
 class BarberSignupPage extends StatefulWidget {
