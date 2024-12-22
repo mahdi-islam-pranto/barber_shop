@@ -46,6 +46,7 @@ dependencies:
   google_sign_in: ^6.2.2
   simple_fontellico_progress_dialog: ^0.3.0
   popover: ^0.3.1
+  image_picker: ^1.1.2
 
   
 

@@ -1,5 +1,6 @@
 import 'package:barber_shop/resources/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class AddShopForm extends StatefulWidget {
   const AddShopForm({super.key});
@@ -33,6 +34,10 @@ class _AddShopFormState extends State<AddShopForm> {
   TextEditingController passwordController = TextEditingController();
 
   bool _isLoading = false;
+
+  // image picker
+  final ImagePicker _picker = ImagePicker();
+  XFile? _image;
 
   @override
   Widget build(BuildContext context) {
@@ -171,7 +176,7 @@ class _AddShopFormState extends State<AddShopForm> {
                         const SizedBox(
                           height: 12,
                         ),
-                        // email form
+                        // shop email form
                         TextFormField(
                             controller: emailController,
                             style: TextStyle(color: textColor),
@@ -204,6 +209,16 @@ class _AddShopFormState extends State<AddShopForm> {
                         const SizedBox(
                           height: 12,
                         ),
+
+                        // add shop front image
+
+                        Container(),
+
+                        const SizedBox(
+                          height: 12,
+                        ),
+
+                        // add multiple images
 
                         const SizedBox(
                           height: 20,
