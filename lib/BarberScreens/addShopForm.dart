@@ -22,6 +22,8 @@ class _AddShopFormState extends State<AddShopForm> {
 
   String password = '';
 
+  String address = '';
+
   // make controllers
   TextEditingController nameController = TextEditingController();
 
@@ -30,8 +32,6 @@ class _AddShopFormState extends State<AddShopForm> {
   TextEditingController phoneController = TextEditingController();
 
   TextEditingController emailController = TextEditingController();
-
-  TextEditingController passwordController = TextEditingController();
 
   bool _isLoading = false;
 
@@ -212,7 +212,47 @@ class _AddShopFormState extends State<AddShopForm> {
 
                         // add shop front image
 
-                        Container(),
+                        Row(children: [
+                          Container(
+                            decoration: ShapeDecoration(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(9)),
+                              color: const Color(0xff2F3646),
+                            ),
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(15.0),
+                                  child: Text(
+                                    "Add shop front image",
+                                    style: TextStyle(color: textColor),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                            width: 11,
+                          ),
+                          Container(
+                            decoration: ShapeDecoration(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(9)),
+                              color: const Color(0xff2F3646),
+                            ),
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(15.0),
+                                  child: Text(
+                                    "Add more shop images",
+                                    style: TextStyle(color: textColor),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ]),
 
                         const SizedBox(
                           height: 12,
@@ -247,7 +287,7 @@ class _AddShopFormState extends State<AddShopForm> {
                                       name = nameController.text;
                                       email = emailController.text;
                                       phone = phoneController.text;
-                                      password = passwordController.text;
+                                      address = addressController.text;
                                     });
                                     // sign up user with email and password
                                   }
