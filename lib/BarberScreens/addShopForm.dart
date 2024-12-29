@@ -2,12 +2,15 @@ import 'dart:io';
 
 import 'package:animated_snack_bar/animated_snack_bar.dart';
 import 'package:barber_shop/resources/colors.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/foundation.dart';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:simple_fontellico_progress_dialog/simple_fontico_loading.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../components/customProgressIndecator.dart';
 
 class AddShopForm extends StatefulWidget {
   const AddShopForm({super.key});
@@ -85,36 +88,98 @@ class _AddShopFormState extends State<AddShopForm> {
   // function to upload image to supabase storage
   Future uploadImage() async {
     // loop through all selected images
-    for (var i = 0; i < selectedImages.length; i++) {
-      // upload image to supabase storage and get image url
+    try {
+      for (var i = 0; i < selectedImages.length; i++) {
+        // upload image to supabase storage and get image url
 
-      await supabase.storage
-          .from('barberShopImages')
-          .upload(
-            'shopImages/$userUid/${selectedImages[i].path.split('/').last}',
+        await supabase.storage
+            .from('barberShopImages')
+            .upload(
+              'shopImages/$userUid/${selectedImages[i].path.split('/').last}',
 
-            // file path
-            File(selectedImages[i].path),
-          )
-          .then((value) {
-        print('image uploaded');
-      });
+              // file path
+              File(selectedImages[i].path),
+            )
+            .then((value) {
+          print('image uploaded');
+        });
 
-      // get image url
-      String imageUrl = await supabase.storage
-          .from('barberShopImages')
-          .getPublicUrl(
-              'shopImages/$userUid/${selectedImages[i].path.split('/').last}');
+        // get image url
+        String imageUrl = await supabase.storage
+            .from('barberShopImages')
+            .getPublicUrl(
+                'shopImages/$userUid/${selectedImages[i].path.split('/').last}');
 
-      print('uploaded image url $imageUrl');
+        print('uploaded image url $imageUrl');
 
-      // add image url to images list
-      // so that we can save them in firestore
-      // along with other data
+        // add image url to images list
+        // so that we can save them in firestore
+        // along with other data
 
-      uploadedImages.add(imageUrl);
-      print('uploaded images $uploadedImages');
+        uploadedImages.add(imageUrl);
+        print('uploaded images $uploadedImages');
+      }
+    } catch (e) {
+      // if any error occurs while uploading image
+      // show error message
+      AnimatedSnackBar.material(
+        'Error uploading image',
+        type: AnimatedSnackBarType.error,
+        duration: const Duration(seconds: 3),
+        mobileSnackBarPosition: MobileSnackBarPosition.top,
+      );
     }
+  }
+
+  // function to add shop to firestore
+  Future addShop() async {
+    // add loading
+    // show loading
+    CustomProgress customProgress = CustomProgress(context);
+    customProgress.showDialog(
+        "Please wait", SimpleFontelicoProgressDialogType.spinner);
+
+    // upload all images to supabase storage
+    // await uploadImage();
+    // add shop to firestore collection with uid of current user then all shop data
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('BarberShops')
+          .doc(userUid)
+          .collection('shops')
+          .add({
+        'name': name,
+        'phone': phone,
+        'email': email,
+        'address': address,
+        'images': uploadedImages,
+        'ownerUid': userUid,
+      }).then((value) {
+        // if shop is added successfully
+        // show snackbar
+        AnimatedSnackBar.material(
+          'Shop added successfully',
+          type: AnimatedSnackBarType.success,
+          duration: const Duration(seconds: 3),
+          mobileSnackBarPosition: MobileSnackBarPosition.top,
+        );
+      });
+    } catch (e) {
+      // if any error occurs while adding shop
+      // show error message
+      AnimatedSnackBar.material(
+        'Error adding shop',
+        type: AnimatedSnackBarType.error,
+        duration: const Duration(seconds: 3),
+        mobileSnackBarPosition: MobileSnackBarPosition.top,
+      );
+      // hide loading
+      customProgress.hideDialog();
+    }
+
+    // hide loading
+    customProgress.hideDialog();
   }
 
   @override
@@ -388,6 +453,7 @@ class _AddShopFormState extends State<AddShopForm> {
                                   uploadImage();
 
                                   // then save all data in firestore
+                                  addShop();
                                 },
                                 child: _isLoading
                                     ? CircularProgressIndicator(
