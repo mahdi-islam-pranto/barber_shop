@@ -1,4 +1,8 @@
+import 'dart:io';
+
+import 'package:animated_snack_bar/animated_snack_bar.dart';
 import 'package:barber_shop/resources/colors.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -35,9 +39,33 @@ class _AddShopFormState extends State<AddShopForm> {
 
   bool _isLoading = false;
 
-  // image picker
-  final ImagePicker _picker = ImagePicker();
-  XFile? _image;
+  List<File> selectedImages = []; // List of selected image
+  final picker = ImagePicker(); // Instance of Image picker
+
+  Future getImages() async {
+    final pickedFile = await picker.pickMultiImage(
+        imageQuality: 100, // To set quality of images
+        maxHeight: 1000, // To set maxheight of images that you want in your app
+        maxWidth: 1000); // To set maxheight of images that you want in your app
+    List<XFile> xfilePick = pickedFile;
+
+    // if atleast 1 images is selected it will add
+    // all images in selectedImages
+    // variable so that we can easily show them in UI
+    if (xfilePick.isNotEmpty) {
+      for (var i = 0; i < xfilePick.length; i++) {
+        selectedImages.add(File(xfilePick[i].path));
+      }
+      setState(
+        () {},
+      );
+    } else {
+      // If no image is selected it will show a
+      // snackbar saying nothing is selected
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Nothing is selected')));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -212,47 +240,49 @@ class _AddShopFormState extends State<AddShopForm> {
 
                         // add shop front image
 
-                        Row(children: [
-                          Container(
-                            decoration: ShapeDecoration(
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(9)),
-                              color: const Color(0xff2F3646),
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height / 15,
+                          width: MediaQuery.of(context).size.width,
+                          child: ElevatedButton(
+                            style: ButtonStyle(
+                              backgroundColor:
+                                  MaterialStateProperty.all<Color>(boxColor),
+                              alignment: Alignment.centerLeft,
+                              shape: MaterialStateProperty.all<
+                                      RoundedRectangleBorder>(
+                                  RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                              )),
                             ),
-                            child: Column(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(15.0),
-                                  child: Text(
-                                    "Add shop front image",
-                                    style: TextStyle(color: textColor),
+                            // TO change button color
+                            child: Text(
+                                "Select Shop Images (First image will be shop's front image)*",
+                                style: TextStyle(
+                                    color: textColor.withOpacity(0.5))),
+                            onPressed: () {
+                              getImages();
+                            },
+                          ),
+                        ),
+
+                        // show selected images
+
+                        selectedImages.isNotEmpty
+                            ? Container(
+                                height: 100,
+                                child: ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: selectedImages.length,
+                                  itemBuilder: (context, index) => Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Image.file(
+                                      selectedImages[index],
+                                      height: 100,
+                                    ),
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(
-                            width: 11,
-                          ),
-                          Container(
-                            decoration: ShapeDecoration(
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(9)),
-                              color: const Color(0xff2F3646),
-                            ),
-                            child: Column(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(15.0),
-                                  child: Text(
-                                    "Add more shop images",
-                                    style: TextStyle(color: textColor),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ]),
+                              )
+                            : const Text('No image selected'),
 
                         const SizedBox(
                           height: 12,
@@ -290,6 +320,17 @@ class _AddShopFormState extends State<AddShopForm> {
                                       address = addressController.text;
                                     });
                                     // sign up user with email and password
+                                  }
+                                  // if no image is selected it will show a
+                                  // snackbar saying nothing is selected
+                                  if (selectedImages.isEmpty) {
+                                    AnimatedSnackBar.material(
+                                      'Please select at least one image for your shop',
+                                      type: AnimatedSnackBarType.error,
+                                      duration: const Duration(seconds: 3),
+                                      mobileSnackBarPosition:
+                                          MobileSnackBarPosition.top,
+                                    ).show(context);
                                   }
                                 },
                                 child: _isLoading
