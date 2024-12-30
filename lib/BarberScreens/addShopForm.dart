@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:animated_snack_bar/animated_snack_bar.dart';
+import 'package:barber_shop/BarberScreens/barberHomePage.dart';
 import 'package:barber_shop/resources/colors.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -86,64 +87,71 @@ class _AddShopFormState extends State<AddShopForm> {
   List<String> uploadedImages = [];
 
   // function to upload image to supabase storage
-  Future uploadImage() async {
-    // loop through all selected images
+
+  Future<List<String>> uploadImages() async {
+    List<String> uploadedImageUrls = [];
     try {
       for (var i = 0; i < selectedImages.length; i++) {
-        // upload image to supabase storage and get image url
+        String imagePath =
+            'shopImages/$userUid/$name/${selectedImages[i].path.split('/').last}';
 
-        await supabase.storage
-            .from('barberShopImages')
-            .upload(
-              'shopImages/$userUid/${selectedImages[i].path.split('/').last}',
+        // Upload image
+        await supabase.storage.from('barberShopImages').upload(
+              imagePath,
+              selectedImages[i],
+            );
 
-              // file path
-              File(selectedImages[i].path),
-            )
-            .then((value) {
-          print('image uploaded');
-        });
-
-        // get image url
+        // Get public URL
         String imageUrl = await supabase.storage
             .from('barberShopImages')
-            .getPublicUrl(
-                'shopImages/$userUid/${selectedImages[i].path.split('/').last}');
+            .getPublicUrl(imagePath);
 
-        print('uploaded image url $imageUrl');
-
-        // add image url to images list
-        // so that we can save them in firestore
-        // along with other data
-
-        uploadedImages.add(imageUrl);
-        print('uploaded images $uploadedImages');
+        uploadedImageUrls.add(imageUrl);
       }
+      return uploadedImageUrls;
     } catch (e) {
-      // if any error occurs while uploading image
-      // show error message
-      AnimatedSnackBar.material(
-        'Error uploading image',
-        type: AnimatedSnackBarType.error,
-        duration: const Duration(seconds: 3),
-        mobileSnackBarPosition: MobileSnackBarPosition.top,
-      );
+      throw Exception('Failed to upload images: $e');
     }
   }
 
-  // function to add shop to firestore
-  Future addShop() async {
-    // add loading
-    // show loading
+// addShop function to handle the shop creation process
+  Future<void> addShop() async {
+    // Check if any image is selected
+    if (selectedImages.isEmpty) {
+      AnimatedSnackBar.material(
+        'Please select at least one image for your shop',
+        type: AnimatedSnackBarType.error,
+        duration: const Duration(seconds: 3),
+        mobileSnackBarPosition: MobileSnackBarPosition.top,
+      ).show(context);
+      return;
+    }
+
+    // Validate form
+
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    // if form is valid then set all values in variables
+
+    setState(() {
+      name = nameController.text;
+      email = emailController.text;
+      phone = phoneController.text;
+      address = addressController.text;
+    });
+
+    // Show loading dialog
     CustomProgress customProgress = CustomProgress(context);
     customProgress.showDialog(
-        "Please wait", SimpleFontelicoProgressDialogType.spinner);
-
-    // upload all images to supabase storage
-    // await uploadImage();
-    // add shop to firestore collection with uid of current user then all shop data
+        "Creating shop...", SimpleFontelicoProgressDialogType.spinner);
 
     try {
+      // Upload images first to supa base storage and get their URLs
+      final imageUrls = await uploadImages();
+
+      // Add shop data to Firestore database
       await FirebaseFirestore.instance
           .collection('BarberShops')
           .doc(userUid)
@@ -153,33 +161,46 @@ class _AddShopFormState extends State<AddShopForm> {
         'phone': phone,
         'email': email,
         'address': address,
-        'images': uploadedImages,
+        'images': imageUrls,
         'ownerUid': userUid,
-      }).then((value) {
-        // if shop is added successfully
-        // show snackbar
-        AnimatedSnackBar.material(
-          'Shop added successfully',
-          type: AnimatedSnackBarType.success,
-          duration: const Duration(seconds: 3),
-          mobileSnackBarPosition: MobileSnackBarPosition.top,
-        );
+        'createdAt': FieldValue.serverTimestamp(),
       });
-    } catch (e) {
-      // if any error occurs while adding shop
-      // show error message
+
+      // Clear all fields
+      nameController.clear();
+      phoneController.clear();
+      emailController.clear();
+      addressController.clear();
+      setState(() {
+        selectedImages.clear();
+      });
+
+      // Hide loading dialog
+      customProgress.hideDialog();
+
+      // Navigate to home page
+      Navigator.pushReplacement(context,
+          MaterialPageRoute(builder: (context) => const Barberhomepage()));
+
+      // Show success message
       AnimatedSnackBar.material(
-        'Error adding shop',
+        'Shop added successfully',
+        type: AnimatedSnackBarType.success,
+        duration: const Duration(seconds: 3),
+        mobileSnackBarPosition: MobileSnackBarPosition.top,
+      ).show(context);
+    } catch (e) {
+      // Hide loading dialog
+      customProgress.hideDialog();
+
+      // Show error message
+      AnimatedSnackBar.material(
+        'Error creating shop: ${e.toString()}',
         type: AnimatedSnackBarType.error,
         duration: const Duration(seconds: 3),
         mobileSnackBarPosition: MobileSnackBarPosition.top,
-      );
-      // hide loading
-      customProgress.hideDialog();
+      ).show(context);
     }
-
-    // hide loading
-    customProgress.hideDialog();
   }
 
   @override
@@ -422,37 +443,8 @@ class _AddShopFormState extends State<AddShopForm> {
                                   maximumSize: const Size(200, 50),
                                 ),
                                 onPressed: () {
-                                  // add loading
-                                  // const CircularProgressIndicator(
-                                  //   color: Colors.amber,
-                                  // );
-                                  // add validation
-                                  if (_formKey.currentState!.validate()) {
-                                    setState(() {
-                                      name = nameController.text;
-                                      email = emailController.text;
-                                      phone = phoneController.text;
-                                      address = addressController.text;
-                                    });
-                                    // sign up user with email and password
-                                  }
-                                  // if no image is selected it will show a
-                                  // snackbar saying nothing is selected
-                                  if (selectedImages.isEmpty) {
-                                    AnimatedSnackBar.material(
-                                      'Please select at least one image for your shop',
-                                      type: AnimatedSnackBarType.error,
-                                      duration: const Duration(seconds: 3),
-                                      mobileSnackBarPosition:
-                                          MobileSnackBarPosition.top,
-                                    ).show(context);
-                                  }
-
-                                  // save all images in supabase storage
-                                  // and get their urls
-                                  uploadImage();
-
-                                  // then save all data in firestore
+                                  // if all fields are valid
+                                  //  save all data in firestore
                                   addShop();
                                 },
                                 child: _isLoading
