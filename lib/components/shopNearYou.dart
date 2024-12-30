@@ -1,4 +1,6 @@
 import 'package:barber_shop/components/shopOverview.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class ShopNearYou extends StatelessWidget {
@@ -6,49 +8,48 @@ class ShopNearYou extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        padding: const EdgeInsets.only(
-          top: 20,
-        ),
-        height: MediaQuery.of(context).size.height / 5.2,
-        child: ListView(
-          scrollDirection: Axis.horizontal,
-          children: const <Widget>[
-            // all shops each
-            ShopOverview(
-              shopName: 'Look Change Saloon',
-              location: "Mohammadpur, Dhaka",
-              rating: "4.5",
-              imagePath: "assets/images/shop.png",
-            ),
-            SizedBox(width: 20),
+    // get current user data
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User? user = auth.currentUser;
 
-            ShopOverview(
-              shopName: 'Trim Haircut',
-              location: "Dhanmondi, Dhaka",
-              rating: "4.5",
-              imagePath: "assets/images/shop.png",
-            ),
-
-            SizedBox(width: 20),
-
-            ShopOverview(
-              shopName: 'Diamond Saloon',
-              location: "Uttra, Dhaka",
-              rating: "4.4",
-              imagePath: "assets/images/shop.png",
-            ),
-
-            SizedBox(width: 20),
-
-            ShopOverview(
-              shopName: 'Trim Haircut',
-              location: "Dhanmondi, Dhaka",
-              rating: "4.5",
-              imagePath: "assets/images/shop.png",
-            ),
-            SizedBox(width: 20),
-          ],
-        ));
+    return StreamBuilder(
+        stream: FirebaseFirestore.instance
+            .collection('BarberShops')
+            .doc(user?.uid)
+            .collection('shops')
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return Container(
+                padding: const EdgeInsets.only(
+                  top: 20,
+                ),
+                height: MediaQuery.of(context).size.height / 5.2,
+                child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: snapshot.data?.docs.length,
+                    itemBuilder: (context, index) {
+                      return // all shops each
+                          // put shop data from the database here
+                          Row(
+                        children: [
+                          ShopOverview(
+                            shopName: '${snapshot.data?.docs[index]['name']}',
+                            location:
+                                "${snapshot.data?.docs[index]['address']}",
+                            rating: "${snapshot.data?.docs[index]['rating']}",
+                            imagePath:
+                                "${snapshot.data?.docs[index]['images'][0]}", // get the first image
+                          ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                        ],
+                      );
+                    }));
+          } else {
+            return Center(child: CircularProgressIndicator());
+          }
+        });
   }
 }

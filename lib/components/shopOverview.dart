@@ -28,15 +28,13 @@ class ShopOverview extends StatelessWidget {
           CircleAvatar(
             radius: 28,
             backgroundColor: buttonColor,
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Image.asset(
-                    imagePath,
-                  ),
-                ),
-              ],
+            child: ClipOval(
+              child: Image.network(
+                imagePath,
+                fit: BoxFit.cover,
+                width: 56,
+                height: 56,
+              ),
             ),
           ),
 
@@ -53,7 +51,7 @@ class ShopOverview extends StatelessWidget {
                 textAlign: TextAlign.center,
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
-                style: TextStyle(fontSize: 14)),
+                style: const TextStyle(fontSize: 14)),
           ),
 
           SizedBox(
@@ -62,7 +60,7 @@ class ShopOverview extends StatelessWidget {
                 textAlign: TextAlign.center,
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
-                style: TextStyle(fontSize: 13, color: Colors.white30)),
+                style: const TextStyle(fontSize: 13, color: Colors.white30)),
           ),
 
           const SizedBox(
@@ -73,13 +71,13 @@ class ShopOverview extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
+              const Icon(
                 Icons.star,
                 color: Colors.yellow,
                 size: 15,
               ),
-              SizedBox(width: 5),
-              Text(rating, style: TextStyle(fontSize: 16)),
+              const SizedBox(width: 5),
+              Text(rating, style: const TextStyle(fontSize: 16)),
             ],
           ),
         ],
