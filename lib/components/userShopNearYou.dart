@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../resources/colors.dart';
+import '../screens/userShopDetails.dart';
 import 'shopOverview.dart';
 
 class UserShopNearYou extends StatefulWidget {
@@ -59,13 +60,25 @@ class _UserShopNearYouState extends State<UserShopNearYou> {
                       // put shop data from the database here
                       Row(
                     children: [
-                      ShopOverview(
-                        imagePath: images == null
-                            ? "assets/images/shop.png"
-                            : images[0],
-                        shopName: shopData?['name'] ?? 'Shop Name',
-                        rating: shopData?['rating'] ?? '4.8',
-                        location: shopData?['address'] ?? 'Shop Address',
+                      InkWell(
+                        onTap: () {
+                          // go to shop details page
+                          // pass shop data to shop details page
+                          Navigator.push(context,
+                              MaterialPageRoute(builder: (context) {
+                            return UserShopDetails(
+                                shopData:
+                                    shopData?.data() as Map<String, dynamic>);
+                          }));
+                        },
+                        child: ShopOverview(
+                          imagePath: images == null
+                              ? "assets/images/shop.png"
+                              : images[0],
+                          shopName: shopData?['name'] ?? 'Shop Name',
+                          rating: shopData?['rating'] ?? '4.8',
+                          location: shopData?['address'] ?? 'Shop Address',
+                        ),
                       ),
                       const SizedBox(
                         width: 10,
