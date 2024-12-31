@@ -1,3 +1,4 @@
+import 'package:barber_shop/BarberScreens/barberShops.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -5,7 +6,6 @@ import 'package:popover/popover.dart';
 
 import '../components/popUpMenuItems.dart';
 
-import '../components/shopNearYou.dart';
 import '../resources/colors.dart';
 import 'addShopForm.dart';
 
@@ -162,7 +162,7 @@ class _BarberhomepageState extends State<Barberhomepage> {
                   ],
                 )),
 
-            const ShopNearYou(),
+            const BarberShopNearYou(),
 
             const SizedBox(height: 40),
 

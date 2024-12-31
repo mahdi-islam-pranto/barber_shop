@@ -1,4 +1,3 @@
-import 'package:barber_shop/components/shopNearYou.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +5,7 @@ import 'package:popover/popover.dart';
 
 import '../components/popUpMenuItems.dart';
 import '../components/servicesSection.dart';
+import '../components/userShopNearYou.dart';
 import '../resources/colors.dart';
 
 class HomePage extends StatefulWidget {
@@ -168,7 +168,7 @@ class _HomePageState extends State<HomePage> {
                   ],
                 )),
 
-            const ShopNearYou(),
+            const UserShopNearYou(),
 
             const SizedBox(height: 40),
 

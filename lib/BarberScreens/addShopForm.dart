@@ -164,7 +164,7 @@ class _AddShopFormState extends State<AddShopForm> {
         'images': imageUrls,
         'ownerUid': userUid,
         'createdAt': FieldValue.serverTimestamp(),
-        'reviews': "4.8",
+        'rating': "4.8",
       });
 
       // Clear all fields
