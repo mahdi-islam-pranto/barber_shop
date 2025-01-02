@@ -1,8 +1,8 @@
-# barber_shop
+# Barber Shop Appointment System 
 
-A new Flutter project.
+Flutter project.
 
-## Getting Started
+## Key Features 
 
 This project is a starting point for a Flutter application.
 
