@@ -4,7 +4,9 @@ Flutter project.
 
 ## Key Features 
 
-This project is a starting point for a Flutter application.
+1. User and Baber Authentication 
+2. A barber can add multiple Barber shops.
+3. Customer can view all the nearest barber shop with details information. 
 
 A few resources to get you started if this is your first Flutter project:
 
