@@ -6,102 +6,188 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simple_fontellico_progress_dialog/simple_fontico_loading.dart';
-
+import '../BarberScreens/barberHomePage.dart';
 import '../screens/homepage.dart';
 
 class FireAuthServices {
-// creating firebase instance
+  // creating firebase instance
   final FirebaseAuth auth = FirebaseAuth.instance;
+  final GoogleSignIn googleSignIn = GoogleSignIn();
 
   // make signup with email and password function
   // implemented in login page
 
-  // login with google function
-  getCurrentUser() async {
-    return await auth.currentUser;
+  // Get current user function
+  User? getCurrentUser() {
+    return auth.currentUser;
   }
 
   // function to implement the google signin
-
   Future<void> signupWithGoogle(BuildContext context) async {
+    // Store context reference to check if widget is mounted later
+    final scaffoldContext = context;
+
     try {
-      // add loader
-      // show loading
-      CustomProgress customProgress = CustomProgress(context);
+      // Show loading dialog
+      CustomProgress customProgress = CustomProgress(scaffoldContext);
       customProgress.showDialog(
           "Please wait", SimpleFontelicoProgressDialogType.spinner);
 
-      final GoogleSignIn googleSignIn = GoogleSignIn();
-      final GoogleSignInAccount? googleSignInAccount =
-          await googleSignIn.signIn();
-      if (googleSignInAccount != null) {
+      try {
+        // Begin interactive sign in process
+        final GoogleSignInAccount? googleSignInAccount =
+            await googleSignIn.signIn();
+
+        if (googleSignInAccount == null) {
+          // User canceled the sign-in flow
+          customProgress.hideDialog();
+          return;
+        }
+
+        // Obtain auth details from request
         final GoogleSignInAuthentication googleSignInAuthentication =
             await googleSignInAccount.authentication;
+
+        // Create new credential for Firebase
         final AuthCredential authCredential = GoogleAuthProvider.credential(
             idToken: googleSignInAuthentication.idToken,
             accessToken: googleSignInAuthentication.accessToken);
 
-        // Getting users credential
+        // Sign in to Firebase with the Google credential
         UserCredential result = await auth.signInWithCredential(authCredential);
         User? user = result.user;
-        print(user?.displayName.toString());
 
-        print(user?..uid.toString());
+        if (user == null) {
+          customProgress.hideDialog();
+          if (!_isContextValid(scaffoldContext)) return;
 
-        // if user is not exists in firestore, add user
-        if (user != null) {
-          final userDocs = await FirebaseFirestore.instance
-              .collection("users")
-              .doc(user.uid)
-              .get();
-          if (!userDocs.exists) {
-            await FirebaseFirestore.instance
-                .collection("users")
-                .doc(user.uid)
-                .set({
-              "id": user.uid,
-              "name": user.displayName,
-              "phone": user.phoneNumber,
-              "email": user.email,
-              "user-type": "customer",
-            });
-          }
+          AnimatedSnackBar.material(
+            'Failed to sign in with Google',
+            type: AnimatedSnackBarType.error,
+          ).show(scaffoldContext);
+          return;
         }
 
-        // put this user data to firestore
-        // await FirebaseFirestore.instance.collection("users").doc(user?.uid).set({
-        //   "id": user?.uid.toString(),
-        //   "name": user?.displayName.toString(),
-        //   "phone": user?.phoneNumber.toString(),
-        //   "email": user?.email.toString(),
-        // });
+        // Check if user exists in Firestore
+        final userDocs = await FirebaseFirestore.instance
+            .collection("users")
+            .doc(user.uid)
+            .get();
 
-        // save the user data to shared preferences
+        // If user doesn't exist, add to Firestore
+        if (!userDocs.exists) {
+          await FirebaseFirestore.instance
+              .collection("users")
+              .doc(user.uid)
+              .set({
+            "id": user.uid,
+            "name": user.displayName ?? "User",
+            "phone": user.phoneNumber ?? "",
+            "email": user.email ?? "",
+            "user-type": "customer",
+            "created_at": FieldValue.serverTimestamp(),
+          });
+        }
+
+        // Save user data to shared preferences
         SharedPreferences prefs = await SharedPreferences.getInstance();
-        prefs.setString("id", user!.uid.toString());
-        prefs.setString("name", user.displayName.toString());
-        prefs.setString("email", user.email.toString());
+        prefs.setString("id", user.uid);
+        prefs.setString("name", user.displayName ?? "User");
+        prefs.setString("email", user.email ?? "");
+        prefs.setString("user-type",
+            userDocs.exists ? userDocs.get("user-type") : "customer");
 
-        // if user is not null we simply call the MaterialpageRoute,
+        // Hide loading dialog
+        customProgress.hideDialog();
 
-        if (result != null) {
-          customProgress.hideDialog();
-          Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (context) => HomePage()));
-        } // if result not null we simply call the MaterialpageRoute,
+        // Check if context is still valid before navigating
+        if (!_isContextValid(scaffoldContext)) return;
+
+        // Navigate based on user type
+        String userType =
+            userDocs.exists ? userDocs.get("user-type") : "customer";
+
+        if (userType == "barber") {
+          Navigator.pushAndRemoveUntil(
+              scaffoldContext,
+              MaterialPageRoute(builder: (context) => const Barberhomepage()),
+              (route) => false);
+        } else {
+          Navigator.pushAndRemoveUntil(
+              scaffoldContext,
+              MaterialPageRoute(builder: (context) => const HomePage()),
+              (route) => false);
+        }
+
+        // Show success message
         AnimatedSnackBar.material(
           'Logged In Successfully',
           type: AnimatedSnackBarType.success,
           duration: const Duration(seconds: 3),
           mobileSnackBarPosition: MobileSnackBarPosition.top,
-        ).show(context);
-        // for go to the HomePage screen
+        ).show(scaffoldContext);
+      } catch (e) {
+        // Hide loading dialog on error
+        customProgress.hideDialog();
+        rethrow;
       }
     } catch (e) {
-      // show the error in the snackbar
+      // For debugging only
+      debugPrint('Google sign in error: $e');
+
+      // Check if context is still valid before showing error
+      if (!_isContextValid(scaffoldContext)) return;
+
+      // Show error message
       AnimatedSnackBar.material(
-          "User Not Found. Try to login with email and password",
-          type: AnimatedSnackBarType.error);
+        "Failed to sign in with Google. Please try again or use email login.",
+        type: AnimatedSnackBarType.error,
+        duration: const Duration(seconds: 3),
+      ).show(scaffoldContext);
+    }
+  }
+
+  // Helper method to check if context is still valid
+  bool _isContextValid(BuildContext context) {
+    return context.mounted;
+  }
+
+  // Sign out method
+  Future<void> signOut(BuildContext context) async {
+    // Store context reference to check if widget is mounted later
+    final scaffoldContext = context;
+
+    try {
+      // Sign out from Firebase
+      await auth.signOut();
+
+      // Sign out from Google if signed in with Google
+      if (await googleSignIn.isSignedIn()) {
+        await googleSignIn.signOut();
+      }
+
+      // Clear shared preferences
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+
+      // Check if context is still valid before showing message
+      if (!_isContextValid(scaffoldContext)) return;
+
+      // Show success message
+      AnimatedSnackBar.material(
+        'Signed out successfully',
+        type: AnimatedSnackBarType.success,
+      ).show(scaffoldContext);
+    } catch (e) {
+      debugPrint('Sign out error: $e');
+
+      // Check if context is still valid before showing error
+      if (!_isContextValid(scaffoldContext)) return;
+
+      AnimatedSnackBar.material(
+        'Error signing out',
+        type: AnimatedSnackBarType.error,
+      ).show(scaffoldContext);
     }
   }
 }

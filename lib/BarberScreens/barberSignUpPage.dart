@@ -1,11 +1,10 @@
 import 'package:animated_snack_bar/animated_snack_bar.dart';
 import 'package:barber_shop/database.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../resources/colors.dart';
-
 import 'barberHomePage.dart';
 
 class BarberSignupPage extends StatefulWidget {
@@ -22,11 +21,23 @@ class _BarberSignupPageState extends State<BarberSignupPage> {
   void toggleObscured() {
     setState(() {
       obscured = !obscured;
-      if (textFieldFocusNode.hasPrimaryFocus)
+      if (textFieldFocusNode.hasPrimaryFocus) {
         return; // If focus is on text field, dont unfocus
+      }
       textFieldFocusNode.canRequestFocus =
           false; // Prevents focus if tap on eye
     });
+  }
+
+  @override
+  void dispose() {
+    // Clean up controllers when the widget is disposed
+    nameController.dispose();
+    phoneController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    textFieldFocusNode.dispose();
+    super.dispose();
   }
 
   // form key
@@ -47,72 +58,114 @@ class _BarberSignupPageState extends State<BarberSignupPage> {
   bool _isLoading = false;
 
   // signup function with firebase
-  void signupAsBarber() async {
-    if (_formKey.currentState!.validate()) {
+  Future<void> signupAsBarber() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    // Set loading state
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Create user with email and password
+      UserCredential userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
+
+      // Check if widget is still mounted
+      if (!mounted) return;
+
+      debugPrint("User Signed Up: ${userCredential.user!.uid}");
+
+      // add user details to firestore collection
+      String id = userCredential.user!.uid;
+      Map<String, dynamic> userDetailsMap = {
+        "id": id,
+        "name": nameController.text.trim(),
+        "phone": phoneController.text.trim(),
+        "email": emailController.text.trim(),
+        "user-type": "barber",
+        "created_at": FieldValue.serverTimestamp(),
+      };
+
+      // add this user to firestore
       try {
-        UserCredential userCredential = await FirebaseAuth.instance
-            .createUserWithEmailAndPassword(email: email, password: password);
-        print("User Signed Up:   ${userCredential.user!.uid}");
-        print("Email:   ${userCredential.user!.email}");
+        await DatabaseService().addUserDetails(userDetailsMap, id);
+        debugPrint("User added to database successfully");
+      } catch (error) {
+        debugPrint("Failed to add user to database: $error");
+        // Continue with navigation even if database update fails
+        // The user is still created in Firebase Auth
+      }
 
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Registered Successfully")));
+      // Check if widget is still mounted before navigating
+      if (!mounted) return;
 
-        // add user details to firestore collection
-        String id = userCredential.user!.uid;
-        Map<String, dynamic> userDetailsMap = {
-          "id": id,
-          "name": nameController.text.trim(),
-          "phone": phoneController.text.trim(),
-          "email": emailController.text.trim(),
-          "user-type": "barber",
-        };
-        // add this user to firestore
-        await DatabaseService()
-            .addUserDetails(userDetailsMap, id)
-            .then((value) {
-          print("User Added to database successfully");
-        }).catchError((error) {
-          print("Failed to add user: $error");
+      // Clear form fields
+      nameController.clear();
+      phoneController.clear();
+      emailController.clear();
+      passwordController.clear();
+
+      // navigate to barber page and remove all previous routes
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const Barberhomepage()),
+          (route) => false);
+
+      // show snackbar
+      AnimatedSnackBar.material(
+        'Account created Successfully',
+        type: AnimatedSnackBarType.success,
+        duration: const Duration(seconds: 3),
+        mobileSnackBarPosition: MobileSnackBarPosition.top,
+      ).show(context);
+    } on FirebaseAuthException catch (e) {
+      // Check if widget is still mounted
+      if (!mounted) return;
+
+      // Handle specific Firebase Auth errors
+      String errorMessage;
+
+      switch (e.code) {
+        case 'weak-password':
+          errorMessage = 'Password is too weak. Please use a stronger password';
+          break;
+        case 'email-already-in-use':
+          errorMessage =
+              'Email is already in use. Please use a different email';
+          break;
+        case 'invalid-email':
+          errorMessage = 'Invalid email format';
+          break;
+        case 'operation-not-allowed':
+          errorMessage = 'Email/password accounts are not enabled';
+          break;
+        default:
+          errorMessage = 'Registration Error: ${e.message ?? e.code}';
+      }
+
+      AnimatedSnackBar.material(
+        errorMessage,
+        type: AnimatedSnackBarType.error,
+      ).show(context);
+
+      debugPrint('Signup error: ${e.code} - ${e.message}');
+    } catch (e) {
+      // Check if widget is still mounted
+      if (!mounted) return;
+
+      // Handle generic errors
+      AnimatedSnackBar.material(
+        'An error occurred during registration',
+        type: AnimatedSnackBarType.error,
+      ).show(context);
+      debugPrint('Signup error: $e');
+    } finally {
+      // Reset loading state if widget is still mounted
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
         });
-
-        // navigate to barber page
-
-        Navigator.push(context, MaterialPageRoute(builder: (context) {
-          return const Barberhomepage();
-        }));
-
-        // show snackbar
-        AnimatedSnackBar.material(
-          'Account created Successfully',
-          type: AnimatedSnackBarType.success,
-          duration: const Duration(seconds: 3),
-          mobileSnackBarPosition: MobileSnackBarPosition.top,
-        ).show(context);
-      } on FirebaseAuthException catch (e) {
-        if (e.code == 'weak-password') {
-          AnimatedSnackBar.material(
-            'weak Password, make it more strong',
-            type: AnimatedSnackBarType.error,
-          ).show(context);
-        } else if (e.code == 'email-already-in-use') {
-          AnimatedSnackBar.material(
-            'Email already in use',
-            type: AnimatedSnackBarType.error,
-          ).show(context);
-        } else if (e.code == 'invalid-email') {
-          AnimatedSnackBar.material(
-            'Invalid Email',
-            type: AnimatedSnackBarType.error,
-          ).show(context);
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("Please try again with valid information"),
-              backgroundColor: Colors.redAccent,
-            ),
-          );
-        }
       }
     }
   }
@@ -294,48 +347,44 @@ class _BarberSignupPageState extends State<BarberSignupPage> {
                         height: 20,
                       ),
 
-                      // login button
-                      _isLoading
-                          ? Center(
-                              child: CircularProgressIndicator(
-                              color: buttonColor,
-                            ))
-                          : ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: buttonColor,
-                                minimumSize: const Size(250, 50),
-                                maximumSize: const Size(250, 50),
-                              ),
-                              onPressed: () {
-                                // add loading
-                                // const CircularProgressIndicator(
-                                //   color: Colors.amber,
-                                // );
-                                // add validation
+                      // Register as barber button
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: buttonColor,
+                          minimumSize: const Size(250, 50),
+                          maximumSize: const Size(250, 50),
+                        ),
+                        onPressed: _isLoading
+                            ? null // Disable button when loading
+                            : () {
                                 if (_formKey.currentState!.validate()) {
                                   setState(() {
-                                    name = nameController.text;
-                                    email = emailController.text;
-                                    phone = phoneController.text;
-                                    password = passwordController.text;
+                                    name = nameController.text.trim();
+                                    email = emailController.text.trim();
+                                    phone = phoneController.text.trim();
+                                    password = passwordController.text.trim();
                                   });
                                   // sign up user with email and password
                                   signupAsBarber();
                                 }
                               },
-                              child: _isLoading
-                                  ? CircularProgressIndicator(
-                                      color: backGroundColor,
-                                      strokeWidth: 3,
-                                    )
-                                  : Text(
-                                      "Register as barber".toUpperCase(),
-                                      style: TextStyle(
-                                          color: backGroundColor,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                            ),
+                        child: _isLoading
+                            ? SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  color: backGroundColor,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : Text(
+                                "Register as barber".toUpperCase(),
+                                style: TextStyle(
+                                    color: backGroundColor,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                      ),
 
                       const SizedBox(
                         height: 20,

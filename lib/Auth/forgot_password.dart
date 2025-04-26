@@ -12,31 +12,96 @@ class ForgotPassword extends StatefulWidget {
   State<ForgotPassword> createState() => _ForgotPasswordState();
 }
 
-String email = '';
-TextEditingController emailController = TextEditingController();
+class _ForgotPasswordState extends State<ForgotPassword> {
+  String email = '';
+  TextEditingController emailController = TextEditingController();
+  bool _isLoading = false;
 
-resetPassword() async {
-  try {
-    await FirebaseAuth.instance
-        .sendPasswordResetEmail(email: email)
-        .then((value) {
-      print('Password reset link sent to $email');
+  @override
+  void dispose() {
+    emailController.dispose();
+    super.dispose();
+  }
+
+  Future<void> resetPassword() async {
+    if (email.isEmpty) {
+      AnimatedSnackBar.material(
+        'Please enter your email address',
+        type: AnimatedSnackBarType.error,
+      ).show(context);
+      return;
+    }
+
+    // Set loading state
+    setState(() {
+      _isLoading = true;
     });
 
-    // show success message
-    AnimatedSnackBar.material(
-      'Password reset link sent to $email',
-      type: AnimatedSnackBarType.success,
-    );
-  } on FirebaseAuthException catch (e) {
-    AnimatedSnackBar.material(
-      'Error: $e',
-      type: AnimatedSnackBarType.error,
-    );
-  }
-}
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
 
-class _ForgotPasswordState extends State<ForgotPassword> {
+      // Check if widget is still mounted
+      if (!mounted) return;
+
+      // Show success message
+      AnimatedSnackBar.material(
+        'Password reset link sent to $email',
+        type: AnimatedSnackBarType.success,
+      ).show(context);
+
+      // Clear email field
+      emailController.clear();
+
+      // Navigate back after a short delay
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) {
+          Navigator.pop(context);
+        }
+      });
+    } on FirebaseAuthException catch (e) {
+      // Check if widget is still mounted
+      if (!mounted) return;
+
+      String errorMessage;
+
+      switch (e.code) {
+        case 'invalid-email':
+          errorMessage = 'Invalid email format';
+          break;
+        case 'user-not-found':
+          errorMessage = 'No user found with this email';
+          break;
+        default:
+          errorMessage = 'Error: ${e.message ?? e.code}';
+      }
+
+      AnimatedSnackBar.material(
+        errorMessage,
+        type: AnimatedSnackBarType.error,
+      ).show(context);
+
+      debugPrint('Password reset error: ${e.code} - ${e.message}');
+    } catch (e) {
+      // Check if widget is still mounted
+      if (!mounted) return;
+
+      AnimatedSnackBar.material(
+        'An error occurred. Please try again later.',
+        type: AnimatedSnackBarType.error,
+      ).show(context);
+
+      debugPrint('Password reset error: $e');
+    } finally {
+      // Reset loading state if widget is still mounted
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+// Moved to above
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -81,28 +146,32 @@ class _ForgotPasswordState extends State<ForgotPassword> {
             ),
 
             // submit button
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  email = emailController.text;
-                });
-                print("hello");
-                resetPassword();
-
-                // navigate to login page
-                Navigator.pop(context);
-              },
-              child: Padding(
-                padding: const EdgeInsets.only(top: 20),
-                child: Container(
-                  height: 50,
-                  width: 200,
-                  decoration: BoxDecoration(
-                    color: buttonColor,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Center(
-                    child: Text(
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: buttonColor,
+                minimumSize: const Size(200, 50),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              onPressed: _isLoading
+                  ? null // Disable button when loading
+                  : () {
+                      setState(() {
+                        email = emailController.text.trim();
+                      });
+                      resetPassword();
+                    },
+              child: _isLoading
+                  ? SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        color: backGroundColor,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : Text(
                       "Submit",
                       style: TextStyle(
                         color: backGroundColor,
@@ -110,9 +179,6 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ),
-                ),
-              ),
             ),
 
             // back to login button
