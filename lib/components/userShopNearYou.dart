@@ -20,7 +20,8 @@ class _UserShopNearYouState extends State<UserShopNearYou> {
     // get all shops near you from the database and display them
 
     return StreamBuilder(
-        stream: FirebaseFirestore.instance.collectionGroup('shops').snapshots(),
+        stream:
+            FirebaseFirestore.instance.collection('barberShops').snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
           // Handle error state
           if (snapshot.hasError) {

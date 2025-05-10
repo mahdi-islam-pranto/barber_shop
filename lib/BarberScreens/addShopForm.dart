@@ -1,16 +1,14 @@
+import 'dart:developer';
 import 'dart:io';
-
 import 'package:animated_snack_bar/animated_snack_bar.dart';
 import 'package:barber_shop/BarberScreens/barberHomePage.dart';
 import 'package:barber_shop/resources/colors.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:simple_fontellico_progress_dialog/simple_fontico_loading.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
 import '../components/customProgressIndecator.dart';
 
 class AddShopForm extends StatefulWidget {
@@ -87,29 +85,29 @@ class _AddShopFormState extends State<AddShopForm> {
   List<String> uploadedImages = [];
 
   // function to upload image to supabase storage
-
   Future<List<String>> uploadImages() async {
     List<String> uploadedImageUrls = [];
     try {
       for (var i = 0; i < selectedImages.length; i++) {
+        // Create path: barberShopImages/userId/shopName/filename
         String imagePath =
-            'shopImages/$userUid/$name/${selectedImages[i].path.split('/').last}';
+            'barberShopImages/$userUid/$name/${selectedImages[i].path.split('/').last}';
 
-        // Upload image
-        await supabase.storage.from('barberShopImages').upload(
+        // Upload image to the shopimages bucket
+        await supabase.storage.from('shopimages').upload(
               imagePath,
               selectedImages[i],
             );
 
-        // Get public URL
-        String imageUrl = await supabase.storage
-            .from('barberShopImages')
-            .getPublicUrl(imagePath);
+        // Get public URL from the shopimages bucket
+        String imageUrl =
+            await supabase.storage.from('shopimages').getPublicUrl(imagePath);
 
         uploadedImageUrls.add(imageUrl);
       }
       return uploadedImageUrls;
     } catch (e) {
+      log('Failed to upload images: $e');
       throw Exception('Failed to upload images: $e');
     }
   }
@@ -151,12 +149,8 @@ class _AddShopFormState extends State<AddShopForm> {
       // Upload images first to supa base storage and get their URLs
       final imageUrls = await uploadImages();
 
-      // Add shop data to Firestore database
-      await FirebaseFirestore.instance
-          .collection('BarberShops')
-          .doc(userUid)
-          .collection('shops')
-          .add({
+      // Add shop data to Firestore database - UPDATED STRUCTURE
+      await FirebaseFirestore.instance.collection('barberShops').add({
         'name': name,
         'phone': phone,
         'email': email,
@@ -194,6 +188,7 @@ class _AddShopFormState extends State<AddShopForm> {
       // Hide loading dialog
       customProgress.hideDialog();
 
+      log('Failed to add shop: $e');
       // Show error message
       AnimatedSnackBar.material(
         'Error creating shop: ${e.toString()}',

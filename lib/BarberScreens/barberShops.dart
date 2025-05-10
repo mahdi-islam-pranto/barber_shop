@@ -16,9 +16,8 @@ class BarberShopNearYou extends StatelessWidget {
 
     return StreamBuilder(
         stream: FirebaseFirestore.instance
-            .collection('BarberShops')
-            .doc(user?.uid)
-            .collection('shops')
+            .collection('barberShops')
+            .where('ownerUid', isEqualTo: user?.uid)
             .snapshots(),
         builder: (context, snapshot) {
           // Handle error state
