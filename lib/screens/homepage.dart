@@ -15,27 +15,36 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-// get current user data
-FirebaseAuth auth = FirebaseAuth.instance;
-User? user = auth.currentUser;
-
-String? email = user?.email;
-String? name = user?.displayName;
-String? photoUrl = user?.photoURL;
-String? uid = user?.uid;
-
 class _HomePageState extends State<HomePage> {
-  // init state
+  // Move user data to instance variables
+  late FirebaseAuth auth;
+  User? user;
+  String? email;
+  String? name;
+  String? photoUrl;
+  String? uid;
+
   @override
-  // void initState() {
-  //   // TODO: implement initState
-  //   super.initState();
-  //   print('User ID init: $uid');
-  //   print('user email: $email');
-  // }
+  void initState() {
+    super.initState();
+    _refreshUserData();
+  }
+
+  // Method to refresh user data
+  void _refreshUserData() {
+    auth = FirebaseAuth.instance;
+    user = auth.currentUser;
+    email = user?.email;
+    name = user?.displayName;
+    photoUrl = user?.photoURL;
+    uid = user?.uid;
+  }
 
   @override
   Widget build(BuildContext context) {
+    // Refresh user data on each build
+    _refreshUserData();
+
     return Scaffold(
       body: Container(
         margin: const EdgeInsets.only(top: 70, left: 20, right: 20),

@@ -1,19 +1,21 @@
-import 'package:animated_snack_bar/animated_snack_bar.dart';
 import 'package:barber_shop/Auth/loginPage.dart';
 import 'package:barber_shop/resources/colors.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import '../screens/homepage.dart';
-
-import 'dart:developer' as developer;
+import '../Auth/fire_auth_services.dart';
 
 class PopOverMenuItems extends StatelessWidget {
   const PopOverMenuItems({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    // Get current user data inside the build method
+    final auth = FirebaseAuth.instance;
+    final user = auth.currentUser;
+    final uid = user?.uid;
+
     return Padding(
       padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
       child: StreamBuilder(
@@ -68,31 +70,18 @@ class PopOverMenuItems extends StatelessWidget {
                             fontSize: 15,
                             color: Colors.black,
                           )),
-                      onPressed: () {
+                      onPressed: () async {
                         try {
-                          // logout user
-                          FirebaseAuth.instance.signOut();
-                          developer.log("User Logged Out");
-                          print("############# User Logged Out");
+                          // Use the centralized signOut method
+                          await FireAuthServices().signOut(context);
 
-                          FirebaseAuth.instance.userChanges().listen((user) {
-                            if (user == null) {
-                              developer.log("User Logged Out");
-                              print("############# User Logged Out");
-                            }
-                          });
-                          // navigate to login page
-                          Navigator.push(
+                          // navigate to login page and remove all previous routes
+                          if (!context.mounted) return;
+                          Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => const LoginPage()));
-                          // show success message
-                          AnimatedSnackBar.material(
-                            'User Logged Out',
-                            type: AnimatedSnackBarType.success,
-                            duration: const Duration(seconds: 3),
-                            mobileSnackBarPosition: MobileSnackBarPosition.top,
-                          ).show(context);
+                                  builder: (context) => const LoginPage()),
+                              (route) => false);
                         } catch (e) {
                           print("Error:" + e.toString());
                         }
